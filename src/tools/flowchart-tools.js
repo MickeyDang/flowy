@@ -1,7 +1,7 @@
 const { v4: uuidv4 } = require('uuid');
 const Flowchart = require('../models/flowchart');
 const LayoutEngine = require('./layout-engine');
-const FlowchartPresentationGenerator = require('../utils/pptx-generator');
+const FlowchartPDFGenerator = require('../utils/pdf-generator');
 const Validator = require('../utils/validation');
 const { 
   FlowchartNotFoundError, 
@@ -97,8 +97,8 @@ const tools = [
     },
   },
   {
-    name: 'export_pptx',
-    description: 'Export a flowchart to PowerPoint presentation',
+    name: 'export_pdf',
+    description: 'Export a flowchart as a PDF document for download',
     inputSchema: {
       type: 'object',
       properties: {
@@ -108,7 +108,7 @@ const tools = [
         },
         filename: {
           type: 'string',
-          description: 'Output filename (without extension)',
+          description: 'Output filename for PDF (without extension)',
         },
       },
       required: ['flowchartId', 'filename'],
@@ -271,7 +271,7 @@ async function autoLayout(args) {
   }
 }
 
-async function exportPptx(args) {
+async function exportPdf(args) {
   try {
     const { flowchartId, filename } = args;
     
@@ -283,15 +283,19 @@ async function exportPptx(args) {
       throw new FlowchartNotFoundError(validatedFlowchartId);
     }
     
-    const generator = new FlowchartPresentationGenerator();
-    const filePath = await generator.generatePresentation(flowchart, validatedFilename);
+    const generator = new FlowchartPDFGenerator();
+    const result = await generator.generatePDF(flowchart, validatedFilename);
+    
+    // Convert buffer to base64 for Claude
+    const base64Data = result.buffer.toString('base64');
+    const dataUri = `data:application/pdf;base64,${base64Data}`;
     
     return {
       content: [
         {
           type: 'text',
-          text: `PowerPoint presentation generated: ${filePath}`,
-        },
+          text: `PDF generated successfully: **${result.filename}**\n\n[📄 Download PDF](${dataUri})\n\n*Click the link above to download your flowchart PDF directly in your browser.*\n\nAlternatively, here's the base64 data if you need it:\n\`\`\`\n${base64Data}\n\`\`\``
+        }
       ],
     };
   } catch (error) {
@@ -299,7 +303,7 @@ async function exportPptx(args) {
       content: [
         {
           type: 'text',
-          text: `Error exporting PowerPoint: ${error.message}`,
+          text: `Error exporting PDF: ${error.message}`,
         },
       ],
       isError: true,
@@ -321,8 +325,8 @@ async function callTool(name, args) {
       return await addConnection(args);
     case 'auto_layout':
       return await autoLayout(args);
-    case 'export_pptx':
-      return await exportPptx(args);
+    case 'export_pdf':
+      return await exportPdf(args);
     default:
       throw new Error(`Unknown tool: ${name}`);
   }

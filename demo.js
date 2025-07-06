@@ -90,9 +90,9 @@ async function runDemo() {
     
     console.log('   ✓ Applied hierarchical layout\n');
 
-    // Step 5: Export to PowerPoint
-    console.log('5. Exporting to PowerPoint...');
-    const exportResult = await flowchartTools.callTool('export_pptx', {
+    // Step 5: Export to PDF
+    console.log('5. Exporting to PDF...');
+    const exportResult = await flowchartTools.callTool('export_pdf', {
       flowchartId,
       filename: 'user-login-flow-demo'
     });
@@ -101,8 +101,8 @@ async function runDemo() {
       throw new Error(exportResult.content[0].text);
     }
     
-    console.log('   ✓ PowerPoint presentation generated');
-    console.log('   📄 File:', exportResult.content[0].text.split(': ')[1]);
+    console.log('   ✓ PDF document generated');
+    console.log('   📄 Response includes download link and base64 data');
     
     console.log('\n🎉 Demo completed successfully!');
     console.log('📋 Summary:');
@@ -110,8 +110,8 @@ async function runDemo() {
     console.log(`   - Nodes created: ${nodes.length}`);
     console.log(`   - Connections added: ${connections.length}`);
     console.log('   - Layout applied: hierarchical');
-    console.log('   - Export format: PowerPoint (.pptx)');
-    console.log('\n💡 You can now open the generated PowerPoint file to view your flowchart!');
+    console.log('   - Export format: PDF (.pdf)');
+    console.log('\n💡 You can now download the generated PDF file to view your flowchart!');
     
   } catch (error) {
     console.error('❌ Demo failed:', error.message);

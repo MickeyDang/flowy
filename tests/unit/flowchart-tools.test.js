@@ -1,8 +1,23 @@
 const { getTools, callTool } = require('../../src/tools/flowchart-tools');
 const { FlowchartNotFoundError, NodeNotFoundError, ValidationError } = require('../../src/utils/errors');
 
-// Mock the PptxGenJS module
-jest.mock('pptxgenjs');
+// Mock the jsPDF module
+jest.mock('jspdf', () => ({
+  jsPDF: jest.fn().mockImplementation(() => ({
+    setProperties: jest.fn(),
+    setFontSize: jest.fn(),
+    setFont: jest.fn(),
+    text: jest.fn(),
+    setFillColor: jest.fn(),
+    setDrawColor: jest.fn(),
+    setLineWidth: jest.fn(),
+    rect: jest.fn(),
+    setTextColor: jest.fn(),
+    line: jest.fn(),
+    triangle: jest.fn(),
+    output: jest.fn().mockReturnValue(Buffer.from('mock-pdf-data'))
+  }))
+}));
 
 // Mock the LayoutEngine
 jest.mock('../../src/tools/layout-engine', () => ({
@@ -25,7 +40,7 @@ describe('flowchart-tools', () => {
       expect(toolNames).toContain('add_node');
       expect(toolNames).toContain('add_connection');
       expect(toolNames).toContain('auto_layout');
-      expect(toolNames).toContain('export_pptx');
+      expect(toolNames).toContain('export_pdf');
     });
 
     test('each tool has required properties', () => {
@@ -236,7 +251,7 @@ describe('flowchart-tools', () => {
     });
   });
 
-  describe('export_pptx', () => {
+  describe('export_pdf', () => {
     let flowchartId;
 
     beforeEach(async () => {
@@ -244,33 +259,36 @@ describe('flowchart-tools', () => {
       flowchartId = result.content[0].text.match(/ID: (.+)$/)[1];
     });
 
-    test('exports flowchart to PowerPoint', async () => {
-      const result = await callTool('export_pptx', {
+    test('exports flowchart to PDF', async () => {
+      const result = await callTool('export_pdf', {
         flowchartId,
         filename: 'test-output',
       });
       
-      expect(result.content[0].text).toMatch(/PowerPoint presentation generated:/);
+      expect(result.content[0].type).toBe('text');
+      expect(result.content[0].text).toContain('PDF generated successfully');
+      expect(result.content[0].text).toContain('test-output.pdf');
+      expect(result.content[0].text).toContain('Download PDF');
       expect(result.isError).toBeUndefined();
     });
 
     test('handles non-existent flowchart', async () => {
-      const result = await callTool('export_pptx', {
+      const result = await callTool('export_pdf', {
         flowchartId: 'non-existent',
         filename: 'test-output',
       });
       
-      expect(result.content[0].text).toMatch(/Error exporting PowerPoint:/);
+      expect(result.content[0].text).toMatch(/Error exporting PDF:/);
       expect(result.isError).toBe(true);
     });
 
     test('handles invalid filename', async () => {
-      const result = await callTool('export_pptx', {
+      const result = await callTool('export_pdf', {
         flowchartId,
         filename: 'invalid<>filename',
       });
       
-      expect(result.content[0].text).toMatch(/Error exporting PowerPoint:/);
+      expect(result.content[0].text).toMatch(/Error exporting PDF:/);
       expect(result.isError).toBe(true);
     });
   });

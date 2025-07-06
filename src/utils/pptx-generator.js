@@ -1,8 +1,5 @@
 const PptxGenJS = require('pptxgenjs');
-const path = require('path');
-const fs = require('fs');
 const Positioning = require('./positioning');
-const config = require('../config/mcp-config');
 
 class FlowchartPresentationGenerator {
   constructor() {
@@ -186,21 +183,15 @@ class FlowchartPresentationGenerator {
       this.createPresentation(flowchart.title || 'Untitled Flowchart');
       this.addFlowchartSlide(flowchart);
       
-      const outputPath = path.join(config.output.defaultPath, `${validatedFilename}.pptx`);
-      
-      // Ensure output directory exists
-      const outputDir = path.dirname(outputPath);
-      if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir, { recursive: true });
-      }
-      
       try {
-        await this.pptx.writeFile(outputPath);
+        const buffer = await this.pptx.write({ outputType: 'nodebuffer' });
+        return {
+          filename: `${validatedFilename}.pptx`,
+          buffer: buffer
+        };
       } catch (writeError) {
-        throw new FileGenerationError(`Failed to write PowerPoint file: ${writeError.message}`, writeError);
+        throw new FileGenerationError(`Failed to generate PowerPoint buffer: ${writeError.message}`, writeError);
       }
-      
-      return outputPath;
     } catch (error) {
       if (error instanceof FileGenerationError) {
         throw error;

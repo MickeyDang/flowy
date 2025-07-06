@@ -1,12 +1,12 @@
-# Flowy - Flowchart to PowerPoint Generator
+# Flowy - Flowchart to PDF Generator
 
-A Node.js application that creates flowcharts and exports them to PowerPoint presentations. Built with MCP (Model Context Protocol) integration for seamless use with Claude Desktop.
+A Node.js application that creates flowcharts and exports them to PDF documents. Built with MCP (Model Context Protocol) integration for seamless use with Claude Desktop.
 
 ## Features
 
 - **Create Flowcharts**: Build flowcharts with custom nodes and connections
 - **Auto Layout**: Automatically arrange nodes using hierarchical layout algorithm
-- **PowerPoint Export**: Generate professional PowerPoint presentations (.pptx)
+- **PDF Export**: Generate professional PDF documents (.pdf)
 - **MCP Integration**: Use directly from Claude Desktop with the MCP server
 - **Interactive Demo**: Run a complete user login flow example
 
@@ -49,7 +49,7 @@ This demo will:
 2. Add 5 nodes (Login Screen, Validate Credentials, Success Page, Error Page, Forgot Password)
 3. Connect the nodes with labeled arrows
 4. Apply automatic hierarchical layout
-5. Export to PowerPoint (.pptx file)
+5. Export to PDF (.pdf file)
 
 ### MCP Server Integration
 
@@ -61,7 +61,7 @@ The application includes an MCP server that can be integrated with Claude Deskto
 - `add_node` - Add a node to an existing flowchart
 - `add_connection` - Add a connection between two nodes
 - `auto_layout` - Apply automatic layout to a flowchart
-- `export_pptx` - Export a flowchart to PowerPoint
+- `export_pdf` - Export a flowchart to PDF
 
 ## Claude Desktop MCP Setup
 
@@ -101,7 +101,7 @@ In Claude Desktop, you should now be able to:
 1. Create flowcharts by asking Claude to use the flowchart tools
 2. Add nodes and connections interactively
 3. Apply auto layout
-4. Export to PowerPoint
+4. Export to PDF
 
 Example conversation:
 ```
@@ -129,7 +129,7 @@ Claude will use the MCP tools to:
 - Add all the nodes
 - Create the connections
 - Apply auto layout
-- Export to PowerPoint
+- Export to PDF
 
 ## API Reference
 
@@ -155,10 +155,10 @@ Claude will use the MCP tools to:
 - **flowchartId**: String - ID of the flowchart
 - **algorithm**: String - Layout algorithm ("hierarchical")
 
-#### `export_pptx(flowchartId, filename)`
+#### `export_pdf(flowchartId, filename)`
 - **flowchartId**: String - ID of the flowchart
 - **filename**: String - Output filename (without extension)
-- **Returns**: File path of generated PowerPoint
+- **Returns**: Text response with PDF download link and base64 data
 
 ## Development
 
@@ -197,7 +197,7 @@ flowy/
 │   │   ├── flowchart-tools.js # MCP tool implementations
 │   │   └── layout-engine.js   # Layout algorithm
 │   ├── utils/
-│   │   ├── pptx-generator.js  # PowerPoint generation
+│   │   ├── pdf-generator.js   # PDF generation
 │   │   ├── validation.js      # Input validation
 │   │   └── errors.js          # Custom error classes
 │   └── server.js              # MCP server entry point
@@ -212,7 +212,7 @@ flowy/
 ### Common Issues
 
 1. **MCP Server not connecting**: Ensure the path in `claude_desktop_config.json` is correct and absolute
-2. **PowerPoint generation fails**: Check that all required dependencies are installed
+2. **PDF generation fails**: Check that all required dependencies are installed
 3. **Layout issues**: Verify that nodes are properly connected before applying layout
 
 ### Debug Mode

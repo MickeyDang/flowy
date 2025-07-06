@@ -1,13 +1,28 @@
 const { callTool } = require('../../src/tools/flowchart-tools');
 const Flowchart = require('../../src/models/flowchart');
 
-// Mock the PptxGenJS module
-jest.mock('pptxgenjs');
+// Mock the jsPDF module
+jest.mock('jspdf', () => ({
+  jsPDF: jest.fn().mockImplementation(() => ({
+    setProperties: jest.fn(),
+    setFontSize: jest.fn(),
+    setFont: jest.fn(),
+    text: jest.fn(),
+    setFillColor: jest.fn(),
+    setDrawColor: jest.fn(),
+    setLineWidth: jest.fn(),
+    rect: jest.fn(),
+    setTextColor: jest.fn(),
+    line: jest.fn(),
+    triangle: jest.fn(),
+    output: jest.fn().mockReturnValue(Buffer.from('mock-pdf-data'))
+  }))
+}));
 
 describe('Complete Flowchart Workflow', () => {
   let flowchartId;
 
-  test('creates complete flowchart and exports to PowerPoint', async () => {
+  test('creates complete flowchart and exports to PDF', async () => {
     // Step 1: Create flowchart
     const createResult = await callTool('create_flowchart', { 
       title: 'Integration Test Flowchart' 
@@ -118,15 +133,16 @@ describe('Complete Flowchart Workflow', () => {
     expect(layoutResult.isError).toBeUndefined();
     expect(layoutResult.content[0].text).toMatch(/Layout applied/);
 
-    // Step 5: Export to PowerPoint
-    const exportResult = await callTool('export_pptx', {
+    // Step 5: Export to PDF
+    const exportResult = await callTool('export_pdf', {
       flowchartId,
       filename: 'integration-test-flowchart',
     });
     
     expect(exportResult.isError).toBeUndefined();
-    expect(exportResult.content[0].text).toMatch(/PowerPoint presentation generated:/);
-    expect(exportResult.content[0].text).toContain('integration-test-flowchart.pptx');
+    expect(exportResult.content[0].type).toBe('text');
+    expect(exportResult.content[0].text).toContain('PDF generated successfully');
+    expect(exportResult.content[0].text).toContain('integration-test-flowchart.pdf');
   });
 
   test('verifies flowchart structure after creation', async () => {
@@ -234,7 +250,7 @@ describe('Complete Flowchart Workflow', () => {
     expect(layoutResult.isError).toBeUndefined();
 
     // Export should work (should handle any missing layouts gracefully)
-    const exportResult = await callTool('export_pptx', {
+    const exportResult = await callTool('export_pdf', {
       flowchartId: testFlowchartId,
       filename: 'error-recovery-test',
     });
@@ -259,7 +275,7 @@ describe('Complete Flowchart Workflow', () => {
     expect(emptyLayoutResult.isError).toBeUndefined();
 
     // Export empty flowchart (should work and show placeholder)
-    const emptyExportResult = await callTool('export_pptx', {
+    const emptyExportResult = await callTool('export_pdf', {
       flowchartId: emptyFlowchartId,
       filename: 'empty-flowchart-test',
     });
@@ -280,7 +296,7 @@ describe('Complete Flowchart Workflow', () => {
       algorithm: 'hierarchical',
     });
 
-    const singleNodeExportResult = await callTool('export_pptx', {
+    const singleNodeExportResult = await callTool('export_pdf', {
       flowchartId: emptyFlowchartId,
       filename: 'single-node-test',
     });

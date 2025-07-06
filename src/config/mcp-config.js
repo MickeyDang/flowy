@@ -1,8 +1,8 @@
 const config = {
   server: {
-    name: 'flowchart-pptx-server',
+    name: 'flowchart-pdf-server',
     version: '1.0.0',
-    description: 'MCP server for generating PowerPoint flowcharts',
+    description: 'MCP server for generating PDF flowcharts',
   },
   
   capabilities: {
@@ -12,10 +12,10 @@ const config = {
         maxNodes: 50,
         supportedNodeTypes: ['start', 'process', 'decision', 'end'],
       },
-      generate_pptx: {
-        description: 'Generate PowerPoint presentations from flowcharts',
-        supportedFormats: ['pptx'],
-        maxSlides: 10,
+      generate_pdf: {
+        description: 'Generate PDF documents from flowcharts',
+        supportedFormats: ['pdf'],
+        maxPages: 10,
       },
     },
   },
@@ -31,10 +31,10 @@ const config = {
       decision: { width: 140, height: 100 },
       end: { width: 120, height: 80 },
     },
-    slide: {
-      width: 1000,
-      height: 700,
-      margin: 50,
+    page: {
+      width: 210, // A4 width in mm
+      height: 297, // A4 height in mm
+      margin: 20, // margin in mm
     },
   },
   
@@ -59,9 +59,9 @@ const config = {
   },
   
   output: {
-    defaultPath: '/Users/mickeydang/Projects/flowy/output',
-    filenamePrefix: 'flowchart_',
-    timestampFormat: 'YYYY-MM-DD_HH-mm-ss',
+    format: 'pdf',
+    encoding: 'base64',
+    delivery: 'inline', // Delivered directly to chat
   },
   
   validation: {
