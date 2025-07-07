@@ -2,6 +2,7 @@ const { v4: uuidv4 } = require('uuid');
 const Flowchart = require('../models/flowchart');
 const LayoutEngine = require('./layout-engine');
 const FlowchartPDFGenerator = require('../utils/pdf-generator');
+const { FlowchartSVGGenerator } = require('../utils/svg-generator');
 const Validator = require('../utils/validation');
 const { 
   FlowchartNotFoundError, 
@@ -10,6 +11,8 @@ const {
   ValidationError 
 } = require('../utils/errors');
 
+//TODO: There is still some wonky issue with export_svg where the layout is getting cut off. Need to fix.
+//TODO: Also need to fix the weird non-blocking errors that pop up when the svg tool is called in my Claude app window.
 const tools = [
   {
     name: 'create_flowchart',
@@ -109,6 +112,36 @@ const tools = [
         filename: {
           type: 'string',
           description: 'Output filename for PDF (without extension)',
+        },
+      },
+      required: ['flowchartId', 'filename'],
+    },
+  },
+  {
+    name: 'export_svg',
+    description: 'Export a flowchart as an SVG for inline display',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        flowchartId: {
+          type: 'string',
+          description: 'ID of the flowchart to export',
+        },
+        filename: {
+          type: 'string',
+          description: 'Output filename for SVG (without extension)',
+        },
+        width: {
+          type: 'number',
+          description: 'Optional width for the SVG in pixels (default: 400)',
+          minimum: 200,
+          maximum: 1200,
+        },
+        height: {
+          type: 'number',
+          description: 'Optional height for the SVG in pixels (default: 600)',
+          minimum: 200,
+          maximum: 1200,
         },
       },
       required: ['flowchartId', 'filename'],
@@ -311,6 +344,58 @@ async function exportPdf(args) {
   }
 }
 
+async function exportSvg(args) {
+  try {
+    const { flowchartId, filename, width = 400, height = 600 } = args;
+    
+    const validatedFlowchartId = Validator.validateId(flowchartId, 'flowchartId');
+    const validatedFilename = Validator.validateFilename(filename);
+    
+    // Validate width and height parameters
+    const validatedWidth = typeof width === 'number' && width >= 200 && width <= 1200 ? width : 400;
+    const validatedHeight = typeof height === 'number' && height >= 200 && height <= 1200 ? height : 600;
+    
+    const flowchart = flowcharts.get(validatedFlowchartId);
+    if (!flowchart) {
+      throw new FlowchartNotFoundError(validatedFlowchartId);
+    }
+    
+    // Debug logging
+    console.log('SVG Export - Flowchart data:', {
+      id: flowchart.id,
+      title: flowchart.title,
+      nodesCount: flowchart.nodes ? flowchart.nodes.size : 0,
+      connectionsCount: flowchart.connections ? flowchart.connections.length : 0,
+      hasLayout: !!flowchart.layout,
+      width: validatedWidth,
+      height: validatedHeight
+    });
+    
+    const generator = new FlowchartSVGGenerator();
+    const svgContent = generator.generateSVG(flowchart, validatedWidth, validatedHeight);
+    
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `SVG generated successfully: **${validatedFilename}.svg** (${validatedWidth}×${validatedHeight}px)\n\n${svgContent}`
+        }
+      ],
+    };
+  } catch (error) {
+    console.error('SVG Export Error:', error);
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Error exporting SVG: ${error.message}`,
+        },
+      ],
+      isError: true,
+    };
+  }
+}
+
 function getTools() {
   return tools;
 }
@@ -327,6 +412,8 @@ async function callTool(name, args) {
       return await autoLayout(args);
     case 'export_pdf':
       return await exportPdf(args);
+    case 'export_svg':
+      return await exportSvg(args);
     default:
       throw new Error(`Unknown tool: ${name}`);
   }
