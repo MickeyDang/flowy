@@ -77,18 +77,9 @@ async function runDemo() {
     }
     console.log();
 
-    // Step 4: Apply auto layout
-    console.log('4. Applying auto layout...');
-    const layoutResult = await flowchartTools.callTool('auto_layout', {
-      flowchartId,
-      algorithm: 'hierarchical'
-    });
-    
-    if (layoutResult.isError) {
-      throw new Error(layoutResult.content[0].text);
-    }
-    
-    console.log('   ✓ Applied hierarchical layout\n');
+    // Step 4: Position nodes manually (nodes already positioned via positionHint)
+    console.log('4. Nodes positioned via manual positioning...');
+    console.log('   ✓ Nodes positioned using set coordinates\n');
 
     // Step 5: Export to PDF
     console.log('5. Exporting to PDF...');
@@ -109,7 +100,7 @@ async function runDemo() {
     console.log(`   - Flowchart ID: ${flowchartId}`);
     console.log(`   - Nodes created: ${nodes.length}`);
     console.log(`   - Connections added: ${connections.length}`);
-    console.log('   - Layout applied: hierarchical');
+    console.log('   - Positioning: manual coordinates');
     console.log('   - Export format: PDF (.pdf)');
     console.log('\n💡 You can now download the generated PDF file to view your flowchart!');
     

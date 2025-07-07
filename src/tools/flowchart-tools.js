@@ -2,7 +2,6 @@
 const createFlowchartHandler = require('./handlers/create-flowchart');
 const addNodeHandler = require('./handlers/add-node');
 const addConnectionHandler = require('./handlers/add-connection');
-const autoLayoutHandler = require('./handlers/auto-layout');
 const exportPdfHandler = require('./handlers/export-pdf');
 const exportSvgHandler = require('./handlers/export-svg');
 const setPositionHandler = require('./handlers/set-position');
@@ -19,7 +18,6 @@ const tools = [
   createFlowchartHandler.toolDefinition,
   addNodeHandler.toolDefinition,
   addConnectionHandler.toolDefinition,
-  autoLayoutHandler.toolDefinition,
   exportPdfHandler.toolDefinition,
   exportSvgHandler.toolDefinition,
   setPositionHandler.toolDefinition,
@@ -34,7 +32,6 @@ const handlers = {
   'create_flowchart': createFlowchartHandler.handler,
   'add_node': addNodeHandler.handler,
   'add_connection': addConnectionHandler.handler,
-  'auto_layout': autoLayoutHandler.handler,
   'export_pdf': exportPdfHandler.handler,
   'export_svg': exportSvgHandler.handler,
   'set_position': setPositionHandler.handler,

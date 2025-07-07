@@ -19,13 +19,7 @@ jest.mock('jspdf', () => ({
   }))
 }));
 
-// Mock the LayoutEngine
-jest.mock('../../src/tools/layout-engine', () => ({
-  calculateLayout: jest.fn(() => ({
-    nodes: new Map(),
-    connections: [],
-  })),
-}));
+// Layout engine has been removed - no longer needed
 
 describe('flowchart-tools', () => {
   describe('getTools', () => {
@@ -33,13 +27,12 @@ describe('flowchart-tools', () => {
       const tools = getTools();
       
       expect(Array.isArray(tools)).toBe(true);
-      expect(tools.length).toBe(11);
+      expect(tools.length).toBe(10);
       
       const toolNames = tools.map(tool => tool.name);
       expect(toolNames).toContain('create_flowchart');
       expect(toolNames).toContain('add_node');
       expect(toolNames).toContain('add_connection');
-      expect(toolNames).toContain('auto_layout');
       expect(toolNames).toContain('export_pdf');
       expect(toolNames).toContain('export_svg');
       expect(toolNames).toContain('set_position');
@@ -218,44 +211,7 @@ describe('flowchart-tools', () => {
     });
   });
 
-  describe('auto_layout', () => {
-    let flowchartId;
-
-    beforeEach(async () => {
-      const result = await callTool('create_flowchart', { title: 'Test Flowchart' });
-      flowchartId = result.content[0].text.match(/ID: (.+)$/)[1];
-    });
-
-    test('applies hierarchical layout', async () => {
-      const result = await callTool('auto_layout', {
-        flowchartId,
-        algorithm: 'hierarchical',
-      });
-      
-      expect(result.content[0].text).toMatch(/Layout applied to .+ using hierarchical algorithm/);
-      expect(result.isError).toBeUndefined();
-    });
-
-    test('handles non-existent flowchart', async () => {
-      const result = await callTool('auto_layout', {
-        flowchartId: 'non-existent',
-        algorithm: 'hierarchical',
-      });
-      
-      expect(result.content[0].text).toMatch(/Error applying layout:/);
-      expect(result.isError).toBe(true);
-    });
-
-    test('handles invalid algorithm', async () => {
-      const result = await callTool('auto_layout', {
-        flowchartId,
-        algorithm: 'invalid',
-      });
-      
-      expect(result.content[0].text).toMatch(/Error applying layout:/);
-      expect(result.isError).toBe(true);
-    });
-  });
+  // auto_layout tests removed - feature deprecated in favor of manual positioning
 
   describe('export_pdf', () => {
     let flowchartId;

@@ -5,7 +5,7 @@ A Node.js application that creates flowcharts and exports them to PDF documents.
 ## Features
 
 - **Create Flowcharts**: Build flowcharts with custom nodes and connections
-- **Auto Layout**: Automatically arrange nodes using hierarchical layout algorithm
+- **Manual Positioning**: Precise control over node positioning with dedicated tools
 - **PDF Export**: Generate professional PDF documents (.pdf)
 - **MCP Integration**: Use directly from Claude Desktop with the MCP server
 - **Interactive Demo**: Run a complete user login flow example
@@ -48,7 +48,7 @@ This demo will:
 1. Create a new flowchart titled "User Login Flow"
 2. Add 5 nodes (Login Screen, Validate Credentials, Success Page, Error Page, Forgot Password)
 3. Connect the nodes with labeled arrows
-4. Apply automatic hierarchical layout
+4. Position nodes manually using positioning tools
 5. Export to PDF (.pdf file)
 
 ### MCP Server Integration
@@ -60,7 +60,10 @@ The application includes an MCP server that can be integrated with Claude Deskto
 - `create_flowchart` - Create a new empty flowchart
 - `add_node` - Add a node to an existing flowchart
 - `add_connection` - Add a connection between two nodes
-- `auto_layout` - Apply automatic layout to a flowchart
+- `set_position` - Set precise position for nodes
+- `resize_node` - Resize nodes to fit content
+- `get_bounding_box` - Get bounding box information
+- `get_connector_points` - Get optimal connection points
 - `export_pdf` - Export a flowchart to PDF
 
 ## Claude Desktop MCP Setup
@@ -100,7 +103,7 @@ In Claude Desktop, you should now be able to:
 
 1. Create flowcharts by asking Claude to use the flowchart tools
 2. Add nodes and connections interactively
-3. Apply auto layout
+3. Position nodes precisely
 4. Export to PDF
 
 Example conversation:
@@ -128,7 +131,7 @@ Claude will use the MCP tools to:
 - Create the flowchart
 - Add all the nodes
 - Create the connections
-- Apply auto layout
+- Position nodes manually
 - Export to PDF
 
 ## API Reference
@@ -151,9 +154,28 @@ Claude will use the MCP tools to:
 - **targetNodeId**: String - ID of the target node
 - **label**: String - Optional label for the connection
 
-#### `auto_layout(flowchartId, algorithm)`
+#### `set_position(flowchartId, nodeId, x, y)`
 - **flowchartId**: String - ID of the flowchart
-- **algorithm**: String - Layout algorithm ("hierarchical")
+- **nodeId**: String - ID of the node to position
+- **x**: Number - X coordinate in inches
+- **y**: Number - Y coordinate in inches
+
+#### `resize_node(flowchartId, nodeId, width, height)`
+- **flowchartId**: String - ID of the flowchart
+- **nodeId**: String - ID of the node to resize
+- **width**: Number - Width in inches
+- **height**: Number - Height in inches
+
+#### `get_bounding_box(flowchartId, nodeIds)`
+- **flowchartId**: String - ID of the flowchart
+- **nodeIds**: Array - Array of node IDs to get bounding box for
+- **Returns**: Bounding box information
+
+#### `get_connector_points(flowchartId, sourceNodeId, targetNodeId)`
+- **flowchartId**: String - ID of the flowchart
+- **sourceNodeId**: String - ID of the source node
+- **targetNodeId**: String - ID of the target node
+- **Returns**: Optimal connection points
 
 #### `export_pdf(flowchartId, filename)`
 - **flowchartId**: String - ID of the flowchart
@@ -213,7 +235,7 @@ flowy/
 
 1. **MCP Server not connecting**: Ensure the path in `claude_desktop_config.json` is correct and absolute
 2. **PDF generation fails**: Check that all required dependencies are installed
-3. **Layout issues**: Verify that nodes are properly connected before applying layout
+3. **Positioning issues**: Use positioning tools to arrange nodes properly
 
 ### Debug Mode
 

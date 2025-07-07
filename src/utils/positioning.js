@@ -1,140 +1,15 @@
 class Positioning {
-  static hierarchicalLayout(flowchart) {
-    const nodes = Array.from(flowchart.nodes.values());
-    const connections = flowchart.connections;
-    
-    if (nodes.length === 0) {
-      return;
-    }
-    
-    const rootNodes = this.findRootNodes(nodes, connections);
-    const levels = this.assignLevels(rootNodes, nodes, connections);
-    
-    this.positionNodes(nodes, levels, flowchart.slideWidth, flowchart.slideHeight);
-  }
+  // DEPRECATED: hierarchicalLayout is no longer used as Claude handles positioning manually
+  // static hierarchicalLayout(flowchart) { ... }
   
-  static findRootNodes(nodes, connections) {
-    const hasIncoming = new Set();
-    connections.forEach(conn => {
-      hasIncoming.add(conn.targetId);
-    });
-    
-    return nodes.filter(node => !hasIncoming.has(node.id));
-  }
+  // DEPRECATED: findRootNodes is no longer used
+  // static findRootNodes(nodes, connections) { ... }
   
-  static assignLevels(rootNodes, nodes, connections) {
-    const levels = new Map();
-    const incomingCounts = new Map();
-    const processedCounts = new Map();
-    
-    // Initialize all nodes
-    nodes.forEach(node => {
-      incomingCounts.set(node.id, 0);
-      processedCounts.set(node.id, 0);
-    });
-    
-    // Count incoming connections for each node
-    connections.forEach(conn => {
-      const targetId = conn.targetId;
-      incomingCounts.set(targetId, incomingCounts.get(targetId) + 1);
-    });
-    
-    // Initialize root nodes
-    rootNodes.forEach(node => {
-      levels.set(node.id, 0);
-    });
-    
-    // Process nodes level by level using topological sort approach
-    let changed = true;
-    while (changed) {
-      changed = false;
-      
-      nodes.forEach(node => {
-        const nodeId = node.id;
-        
-        // Skip if already processed
-        if (levels.has(nodeId)) {
-          // Check if we can update level based on incoming connections
-          const incomingConnections = connections.filter(conn => conn.targetId === nodeId);
-          let maxSourceLevel = -1;
-          let allSourcesProcessed = true;
-          
-          incomingConnections.forEach(conn => {
-            if (levels.has(conn.sourceId)) {
-              maxSourceLevel = Math.max(maxSourceLevel, levels.get(conn.sourceId));
-            } else {
-              allSourcesProcessed = false;
-            }
-          });
-          
-          if (allSourcesProcessed && maxSourceLevel >= 0) {
-            const newLevel = maxSourceLevel + 1;
-            if (levels.get(nodeId) < newLevel) {
-              levels.set(nodeId, newLevel);
-              changed = true;
-            }
-          }
-        } else {
-          // Process node if all its sources have been processed
-          const incomingConnections = connections.filter(conn => conn.targetId === nodeId);
-          
-          if (incomingConnections.length === 0) {
-            // This is a root node
-            levels.set(nodeId, 0);
-            changed = true;
-          } else {
-            let maxSourceLevel = -1;
-            let allSourcesProcessed = true;
-            
-            incomingConnections.forEach(conn => {
-              if (levels.has(conn.sourceId)) {
-                maxSourceLevel = Math.max(maxSourceLevel, levels.get(conn.sourceId));
-              } else {
-                allSourcesProcessed = false;
-              }
-            });
-            
-            if (allSourcesProcessed && maxSourceLevel >= 0) {
-              levels.set(nodeId, maxSourceLevel + 1);
-              changed = true;
-            }
-          }
-        }
-      });
-    }
-    
-    return levels;
-  }
+  // DEPRECATED: assignLevels is no longer used
+  // static assignLevels(rootNodes, nodes, connections) { ... }
   
-  static positionNodes(nodes, levels, slideWidth, slideHeight) {
-    const levelSpacing = 1.5;
-    const margin = 0.5;
-    
-    const levelGroups = new Map();
-    levels.forEach((level, nodeId) => {
-      if (!levelGroups.has(level)) {
-        levelGroups.set(level, []);
-      }
-      levelGroups.get(level).push(nodeId);
-    });
-    
-    const startY = margin;
-    
-    levelGroups.forEach((nodeIds, level) => {
-      const y = startY + (level * levelSpacing);
-      
-      const nodesInLevel = nodeIds.map(id => nodes.find(node => node.id === id));
-      const totalWidth = nodesInLevel.reduce((sum, node) => sum + node.width, 0);
-      const spacing = nodeIds.length > 1 ? (slideWidth - totalWidth - 2 * margin) / (nodeIds.length - 1) : 0;
-      
-      let currentX = margin;
-      
-      nodesInLevel.forEach((node, index) => {
-        node.setPosition(currentX, y);
-        currentX += node.width + spacing;
-      });
-    });
-  }
+  // DEPRECATED: positionNodes is no longer used
+  // static positionNodes(nodes, levels, slideWidth, slideHeight) { ... }
   
   static calculateConnectionPoints(sourceNode, targetNode) {
     const sourceCenterX = sourceNode.x + sourceNode.width / 2;
