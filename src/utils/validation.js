@@ -98,6 +98,38 @@ class Validator {
     
     return algorithm;
   }
+  
+  static validateDimension(dimension, fieldName = 'dimension') {
+    if (typeof dimension !== 'number' || !Number.isFinite(dimension)) {
+      throw new ValidationError(fieldName, dimension, 'must be a finite number');
+    }
+    
+    if (dimension <= 0) {
+      throw new ValidationError(fieldName, dimension, 'must be greater than 0');
+    }
+    
+    if (dimension > 50) {
+      throw new ValidationError(fieldName, dimension, 'cannot exceed 50 inches');
+    }
+    
+    return dimension;
+  }
+  
+  static validatePositionCoordinate(coordinate, fieldName = 'coordinate') {
+    if (typeof coordinate !== 'number' || !Number.isFinite(coordinate)) {
+      throw new ValidationError(fieldName, coordinate, 'must be a finite number');
+    }
+    
+    if (coordinate < 0) {
+      throw new ValidationError(fieldName, coordinate, 'must be greater than or equal to 0');
+    }
+    
+    if (coordinate > 100) {
+      throw new ValidationError(fieldName, coordinate, 'cannot exceed 100 inches');
+    }
+    
+    return coordinate;
+  }
 }
 
 module.exports = Validator;

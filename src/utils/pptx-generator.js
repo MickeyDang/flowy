@@ -6,7 +6,7 @@ class FlowchartPresentationGenerator {
     this.pptx = null;
   }
   
-  createPresentation(title) {
+  createPresentation(title, flowchart) {
     this.pptx = new PptxGenJS();
     
     this.pptx.author = 'Flowchart Generator';
@@ -14,19 +14,21 @@ class FlowchartPresentationGenerator {
     this.pptx.title = title;
     this.pptx.subject = 'Generated Flowchart';
     
+    // Use flowchart dimensions for layout
+    const layoutName = `LAYOUT_${flowchart.slideWidth}x${flowchart.slideHeight}`;
     this.pptx.defineLayout({
-      name: 'LAYOUT_10x7.5',
-      width: 10,
-      height: 7.5,
+      name: layoutName,
+      width: flowchart.slideWidth,
+      height: flowchart.slideHeight,
     });
     
-    this.pptx.layout = 'LAYOUT_10x7.5';
+    this.pptx.layout = layoutName;
     
     const titleSlide = this.pptx.addSlide();
     titleSlide.addText(title, {
       x: 0.5,
-      y: 3,
-      w: 9,
+      y: flowchart.slideHeight / 2 - 0.75,
+      w: flowchart.slideWidth - 1,
       h: 1.5,
       fontSize: 32,
       bold: true,
@@ -54,7 +56,7 @@ class FlowchartPresentationGenerator {
       slide.addText(flowchart.title || 'Untitled Flowchart', {
         x: 0.5,
         y: 0.2,
-        w: 9,
+        w: flowchart.slideWidth - 1,
         h: 0.6,
         fontSize: 20,
         bold: true,
@@ -64,8 +66,8 @@ class FlowchartPresentationGenerator {
       
       if (flowchart.nodes.size === 0) {
         slide.addText('No nodes in flowchart', {
-          x: 2,
-          y: 3,
+          x: flowchart.slideWidth / 2 - 3,
+          y: flowchart.slideHeight / 2 - 0.5,
           w: 6,
           h: 1,
           fontSize: 14,
@@ -180,7 +182,7 @@ class FlowchartPresentationGenerator {
       
       const validatedFilename = Validator.validateFilename(filename);
       
-      this.createPresentation(flowchart.title || 'Untitled Flowchart');
+      this.createPresentation(flowchart.title || 'Untitled Flowchart', flowchart);
       this.addFlowchartSlide(flowchart);
       
       try {

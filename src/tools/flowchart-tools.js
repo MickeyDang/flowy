@@ -8,7 +8,8 @@ const {
   FlowchartNotFoundError, 
   NodeNotFoundError, 
   FileGenerationError, 
-  ValidationError 
+  ValidationError,
+  ConnectionNotFoundError 
 } = require('../utils/errors');
 
 //TODO: There is still some wonky issue with export_svg where the layout is getting cut off. Need to fix.
@@ -23,6 +24,18 @@ const tools = [
         title: {
           type: 'string',
           description: 'Title of the flowchart',
+        },
+        width: {
+          type: 'number',
+          description: 'Optional width of the PowerPoint canvas in inches (default: 10)',
+          minimum: 1,
+          maximum: 50,
+        },
+        height: {
+          type: 'number',
+          description: 'Optional height of the PowerPoint canvas in inches (default: 7.5)',
+          minimum: 1,
+          maximum: 50,
         },
       },
       required: ['title'],
@@ -147,17 +160,80 @@ const tools = [
       required: ['flowchartId', 'filename'],
     },
   },
+  {
+    name: 'set_position',
+    description: 'Set the position of a flowchart element (node or connector) to specific x,y coordinates',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        flowchartId: {
+          type: 'string',
+          description: 'ID of the flowchart containing the element',
+        },
+        elementId: {
+          type: 'string',
+          description: 'ID of the element to position (node ID or connection ID)',
+        },
+        elementType: {
+          type: 'string',
+          enum: ['node', 'connector'],
+          description: 'Type of element to position',
+        },
+        x: {
+          type: 'number',
+          description: 'X coordinate position in inches',
+        },
+        y: {
+          type: 'number',
+          description: 'Y coordinate position in inches',
+        },
+      },
+      required: ['flowchartId', 'elementId', 'elementType', 'x', 'y'],
+    },
+  },
+  {
+    name: 'resize_node',
+    description: 'Resize a flowchart node to specific width and height dimensions',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        flowchartId: {
+          type: 'string',
+          description: 'ID of the flowchart containing the node',
+        },
+        nodeId: {
+          type: 'string',
+          description: 'ID of the node to resize',
+        },
+        width: {
+          type: 'number',
+          description: 'New width of the node in inches',
+          minimum: 0.1,
+          maximum: 20,
+        },
+        height: {
+          type: 'number',
+          description: 'New height of the node in inches',
+          minimum: 0.1,
+          maximum: 15,
+        },
+      },
+      required: ['flowchartId', 'nodeId', 'width', 'height'],
+    },
+  },
 ];
 
 const flowcharts = new Map();
 
 async function createFlowchart(args) {
   try {
-    const { title } = args;
+    const { title, width = 10, height = 7.5 } = args;
     const validatedTitle = Validator.validateText(title, 'flowchart title');
+    const validatedWidth = Validator.validateDimension(width, 'width');
+    const validatedHeight = Validator.validateDimension(height, 'height');
     
     const flowchartId = uuidv4();
-    const flowchart = new Flowchart(flowchartId, validatedTitle);
+    const flowchart = new Flowchart(flowchartId, validatedTitle, validatedWidth, validatedHeight);
     
     flowcharts.set(flowchartId, flowchart);
     
@@ -165,7 +241,7 @@ async function createFlowchart(args) {
       content: [
         {
           type: 'text',
-          text: `Flowchart created with ID: ${flowchartId}`,
+          text: `Flowchart created with ID: ${flowchartId} (${validatedWidth}" × ${validatedHeight}")`,
         },
       ],
     };
@@ -243,13 +319,13 @@ async function addConnection(args) {
       throw new NodeNotFoundError(validatedTargetId);
     }
     
-    flowchart.addConnection(validatedSourceId, validatedTargetId, validatedLabel);
+    const connectionId = flowchart.addConnection(validatedSourceId, validatedTargetId, validatedLabel);
     
     return {
       content: [
         {
           type: 'text',
-          text: `Connection added from ${validatedSourceId} to ${validatedTargetId}`,
+          text: `Connection added with ID: ${connectionId}`,
         },
       ],
     };
@@ -396,6 +472,151 @@ async function exportSvg(args) {
   }
 }
 
+async function setPosition(args) {
+  try {
+    const { flowchartId, elementId, elementType, x, y } = args;
+    
+    // Validate input parameters
+    const validatedFlowchartId = Validator.validateId(flowchartId, 'flowchartId');
+    const validatedElementId = Validator.validateId(elementId, 'elementId');
+    const validatedX = Validator.validatePositionCoordinate(x, 'x');
+    const validatedY = Validator.validatePositionCoordinate(y, 'y');
+    
+    // Validate element type
+    if (!elementType || !['node', 'connector'].includes(elementType)) {
+      throw new ValidationError('elementType', elementType, 'must be either "node" or "connector"');
+    }
+    
+    const flowchart = flowcharts.get(validatedFlowchartId);
+    if (!flowchart) {
+      throw new FlowchartNotFoundError(validatedFlowchartId);
+    }
+    
+    // Validate coordinates are within flowchart bounds
+    if (validatedX < 0 || validatedX > flowchart.slideWidth) {
+      throw new ValidationError('x', validatedX, `must be between 0 and ${flowchart.slideWidth} inches`);
+    }
+    
+    if (validatedY < 0 || validatedY > flowchart.slideHeight) {
+      throw new ValidationError('y', validatedY, `must be between 0 and ${flowchart.slideHeight} inches`);
+    }
+    
+    let result;
+    
+    if (elementType === 'node') {
+      // Handle node positioning
+      const node = flowchart.getNode(validatedElementId);
+      if (!node) {
+        throw new NodeNotFoundError(validatedElementId);
+      }
+      
+      // Update node position
+      node.setPosition(validatedX, validatedY);
+      
+      result = {
+        content: [
+          {
+            type: 'text',
+            text: `Node "${validatedElementId}" positioned at (${validatedX}, ${validatedY})`,
+          },
+        ],
+      };
+      
+    } else if (elementType === 'connector') {
+      // Handle connector positioning
+      const connection = flowchart.getConnection(validatedElementId);
+      if (!connection) {
+        throw new ConnectionNotFoundError(validatedElementId);
+      }
+      
+      // For connectors, we'll set a control point or waypoint
+      // Initialize pathPoints if it doesn't exist
+      if (!connection.pathPoints) {
+        connection.pathPoints = [];
+      }
+      
+      // Add or update a waypoint at the specified position
+      connection.pathPoints.push({ x: validatedX, y: validatedY });
+      
+      result = {
+        content: [
+          {
+            type: 'text',
+            text: `Connector "${validatedElementId}" updated with waypoint at (${validatedX}, ${validatedY})`,
+          },
+        ],
+      };
+    }
+    
+    return result;
+    
+  } catch (error) {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Error setting position: ${error.message}`,
+        },
+      ],
+      isError: true,
+    };
+  }
+}
+
+async function resizeNode(args) {
+  try {
+    const { flowchartId, nodeId, width, height } = args;
+    
+    // Validate input parameters
+    const validatedFlowchartId = Validator.validateId(flowchartId, 'flowchartId');
+    const validatedNodeId = Validator.validateId(nodeId, 'nodeId');
+    const validatedWidth = Validator.validateDimension(width, 'width');
+    const validatedHeight = Validator.validateDimension(height, 'height');
+    
+    // Additional bounds checking for node dimensions
+    if (validatedWidth < 0.1 || validatedWidth > 20) {
+      throw new ValidationError('width', validatedWidth, 'must be between 0.1 and 20 inches');
+    }
+    
+    if (validatedHeight < 0.1 || validatedHeight > 15) {
+      throw new ValidationError('height', validatedHeight, 'must be between 0.1 and 15 inches');
+    }
+    
+    const flowchart = flowcharts.get(validatedFlowchartId);
+    if (!flowchart) {
+      throw new FlowchartNotFoundError(validatedFlowchartId);
+    }
+    
+    const node = flowchart.getNode(validatedNodeId);
+    if (!node) {
+      throw new NodeNotFoundError(validatedNodeId);
+    }
+    
+    // Update node dimensions using the existing setSize method
+    node.setSize(validatedWidth, validatedHeight);
+    
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Node "${validatedNodeId}" resized to ${validatedWidth}" × ${validatedHeight}"`,
+        },
+      ],
+    };
+    
+  } catch (error) {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Error resizing node: ${error.message}`,
+        },
+      ],
+      isError: true,
+    };
+  }
+}
+
 function getTools() {
   return tools;
 }
@@ -414,6 +635,10 @@ async function callTool(name, args) {
       return await exportPdf(args);
     case 'export_svg':
       return await exportSvg(args);
+    case 'set_position':
+      return await setPosition(args);
+    case 'resize_node':
+      return await resizeNode(args);
     default:
       throw new Error(`Unknown tool: ${name}`);
   }

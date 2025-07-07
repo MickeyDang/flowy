@@ -31,9 +31,18 @@ class ValidationError extends Error {
   }
 }
 
+class ConnectionNotFoundError extends Error {
+  constructor(connectionId) {
+    super(`Connection with ID "${connectionId}" not found`);
+    this.name = 'ConnectionNotFoundError';
+    this.connectionId = connectionId;
+  }
+}
+
 module.exports = {
   FlowchartNotFoundError,
   NodeNotFoundError,
   FileGenerationError,
   ValidationError,
+  ConnectionNotFoundError,
 };

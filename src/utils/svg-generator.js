@@ -14,11 +14,17 @@ class FlowchartSVGGenerator {
   /**
    * Generate SVG for a flowchart
    * @param {Object} flowchart - The flowchart data (matches PDF generator expectations)
-   * @param {number} width - The desired width for the SVG (default: 400)
-   * @param {number} height - The desired height for the SVG (default: 600)
+   * @param {number} width - The desired width for the SVG (defaults to flowchart canvas width * 40)
+   * @param {number} height - The desired height for the SVG (defaults to flowchart canvas height * 40)
    * @returns {string} SVG markup
    */
-  generateSVG(flowchart, width = 400, height = 600) {
+  generateSVG(flowchart, width = null, height = null) {
+    // Use flowchart dimensions as defaults (convert inches to pixels at ~40 pixels per inch)
+    const defaultWidth = flowchart.slideWidth * 40;
+    const defaultHeight = flowchart.slideHeight * 40;
+    
+    width = width || defaultWidth;
+    height = height || defaultHeight;
     if (!flowchart) {
       throw new Error('Flowchart object is required');
     }

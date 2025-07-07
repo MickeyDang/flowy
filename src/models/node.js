@@ -70,6 +70,8 @@ class FlowchartNode {
         color: '000000',
         align: 'center',
         valign: 'middle',
+        shrinkText: true,
+        isTextBox: true,
       },
     };
   }

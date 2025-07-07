@@ -210,6 +210,60 @@ class Positioning {
       y: node.y + offsetY,
     }));
   }
+  
+  /**
+   * Calculate bounding box for a path defined by points
+   * @param {Array} pathPoints - Array of {x, y} points defining the path
+   * @returns {Object} Bounding box with minX, minY, maxX, maxY
+   */
+  static calculateBoundingBoxForPath(pathPoints) {
+    if (!pathPoints || pathPoints.length === 0) {
+      return { minX: 0, minY: 0, maxX: 0, maxY: 0 };
+    }
+    
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    
+    pathPoints.forEach(point => {
+      if (point && typeof point.x === 'number' && typeof point.y === 'number') {
+        minX = Math.min(minX, point.x);
+        minY = Math.min(minY, point.y);
+        maxX = Math.max(maxX, point.x);
+        maxY = Math.max(maxY, point.y);
+      }
+    });
+    
+    // If no valid points were found, return zero bounding box
+    if (minX === Infinity) {
+      return { minX: 0, minY: 0, maxX: 0, maxY: 0 };
+    }
+    
+    return { minX, minY, maxX, maxY };
+  }
+  
+  /**
+   * Check if two bounding boxes overlap
+   * @param {Object} box1 - First bounding box {minX, minY, maxX, maxY}
+   * @param {Object} box2 - Second bounding box {minX, minY, maxX, maxY}
+   * @returns {boolean} True if boxes overlap
+   */
+  static checkOverlap(box1, box2) {
+    if (!box1 || !box2) {
+      return false;
+    }
+    
+    // Check if boxes are separated (no overlap)
+    if (box1.maxX < box2.minX ||  // box1 is to the left of box2
+        box2.maxX < box1.minX ||  // box2 is to the left of box1
+        box1.maxY < box2.minY ||  // box1 is above box2
+        box2.maxY < box1.minY) {  // box2 is above box1
+      return false;
+    }
+    
+    return true;
+  }
 }
 
 module.exports = Positioning;

@@ -4,14 +4,18 @@ const Positioning = require('./positioning');
 class FlowchartPDFGenerator {
   constructor() {
     this.pdf = null;
-    this.pageWidth = 210; // A4 width in mm
-    this.pageHeight = 297; // A4 height in mm
+    this.pageWidth = 210; // Default A4 width in mm
+    this.pageHeight = 297; // Default A4 height in mm
     this.scale = 20; // Scale factor for converting logical units to mm
     this.margin = 20; // Margin in mm
   }
   
-  createPDF(title) {
-    this.pdf = new jsPDF('p', 'mm', 'a4');
+  createPDF(title, flowchart) {
+    // Use flowchart dimensions converted to mm (1 inch = 25.4 mm)
+    this.pageWidth = flowchart.slideWidth * 25.4;
+    this.pageHeight = flowchart.slideHeight * 25.4;
+    
+    this.pdf = new jsPDF('p', 'mm', [this.pageWidth, this.pageHeight]);
     
     // Set document properties
     this.pdf.setProperties({
@@ -178,7 +182,7 @@ class FlowchartPDFGenerator {
       
       const validatedFilename = Validator.validateFilename(filename);
       
-      this.createPDF(flowchart.title || 'Untitled Flowchart');
+      this.createPDF(flowchart.title || 'Untitled Flowchart', flowchart);
       this.addFlowchartPage(flowchart);
       
       try {

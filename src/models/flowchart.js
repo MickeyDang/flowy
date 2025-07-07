@@ -1,12 +1,12 @@
 class Flowchart {
-  constructor(id, title) {
+  constructor(id, title, width = 10, height = 7.5) {
     this.id = id;
     this.title = title;
     this.nodes = new Map();
     this.connections = [];
     this.layout = null;
-    this.slideWidth = 10;
-    this.slideHeight = 7.5;
+    this.slideWidth = width;
+    this.slideHeight = height;
     this.createdAt = new Date();
   }
   
@@ -55,7 +55,7 @@ class Flowchart {
     }
   }
   
-  addConnection(sourceId, targetId, label = '') {
+  addConnection(sourceId, targetId, label = '', pathPoints = null) {
     const Validator = require('../utils/validation');
     const { NodeNotFoundError } = require('../utils/errors');
     
@@ -72,11 +72,19 @@ class Flowchart {
         throw new NodeNotFoundError(validatedTargetId);
       }
       
-      this.connections.push({ 
-        sourceId: validatedSourceId, 
-        targetId: validatedTargetId, 
-        label: validatedLabel 
-      });
+      // Generate unique connection ID
+      const connectionId = `conn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      const connection = {
+        id: connectionId,
+        sourceId: validatedSourceId,
+        targetId: validatedTargetId,
+        label: validatedLabel,
+        pathPoints: pathPoints
+      };
+      
+      this.connections.push(connection);
+      return connectionId;
     } catch (error) {
       throw error;
     }
@@ -86,6 +94,28 @@ class Flowchart {
     this.connections = this.connections.filter(
       conn => !(conn.sourceId === sourceId && conn.targetId === targetId)
     );
+  }
+  
+  removeConnectionById(connectionId) {
+    const Validator = require('../utils/validation');
+    const { ConnectionNotFoundError } = require('../utils/errors');
+    
+    try {
+      const validatedConnectionId = Validator.validateId(connectionId, 'connectionId');
+      
+      const connectionIndex = this.connections.findIndex(conn => conn.id === validatedConnectionId);
+      if (connectionIndex === -1) {
+        throw new ConnectionNotFoundError(validatedConnectionId);
+      }
+      
+      this.connections.splice(connectionIndex, 1);
+    } catch (error) {
+      throw error;
+    }
+  }
+  
+  getConnection(connectionId) {
+    return this.connections.find(conn => conn.id === connectionId);
   }
   
   getNode(nodeId) {
@@ -111,7 +141,9 @@ class Flowchart {
   
   static fromJSON(data) {
     const FlowchartNode = require('./node');
-    const flowchart = new Flowchart(data.id, data.title);
+    const width = data.slideWidth !== undefined ? data.slideWidth : 10;
+    const height = data.slideHeight !== undefined ? data.slideHeight : 7.5;
+    const flowchart = new Flowchart(data.id, data.title, width, height);
     
     if (data.nodes && Array.isArray(data.nodes)) {
       data.nodes.forEach(nodeData => {
@@ -121,19 +153,24 @@ class Flowchart {
     }
     
     if (data.connections) {
-      flowchart.connections = data.connections;
+      // Ensure backward compatibility with old connection format
+      flowchart.connections = data.connections.map(conn => {
+        if (!conn.id) {
+          // Generate ID for legacy connections
+          return {
+            id: `conn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            sourceId: conn.sourceId,
+            targetId: conn.targetId,
+            label: conn.label || '',
+            pathPoints: conn.pathPoints || null
+          };
+        }
+        return conn;
+      });
     }
     
     if (data.layout) {
       flowchart.setLayout(data.layout);
-    }
-    
-    if (data.slideWidth !== undefined) {
-      flowchart.slideWidth = data.slideWidth;
-    }
-    
-    if (data.slideHeight !== undefined) {
-      flowchart.slideHeight = data.slideHeight;
     }
     
     if (data.createdAt) {
