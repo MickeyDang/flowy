@@ -7,6 +7,9 @@ const exportPdfHandler = require('./handlers/export-pdf');
 const exportSvgHandler = require('./handlers/export-svg');
 const setPositionHandler = require('./handlers/set-position');
 const resizeNodeHandler = require('./handlers/resize-node');
+const getBoundingBoxHandler = require('./handlers/get-bounding-box');
+const getConnectorPointsHandler = require('./handlers/get-connector-points');
+const setConnectorPathHandler = require('./handlers/set-connector-path');
 
 // Maintain the flowcharts Map at module level for all handlers to access
 const flowcharts = new Map();
@@ -21,6 +24,9 @@ const tools = [
   exportSvgHandler.toolDefinition,
   setPositionHandler.toolDefinition,
   resizeNodeHandler.toolDefinition,
+  getBoundingBoxHandler.toolDefinition,
+  getConnectorPointsHandler.toolDefinition,
+  setConnectorPathHandler.toolDefinition,
 ];
 
 // Create handler map for routing
@@ -33,6 +39,9 @@ const handlers = {
   'export_svg': exportSvgHandler.handler,
   'set_position': setPositionHandler.handler,
   'resize_node': resizeNodeHandler.handler,
+  'get_bounding_box': getBoundingBoxHandler.handler,
+  'get_connector_points': getConnectorPointsHandler.handler,
+  'set_connector_path': setConnectorPathHandler.handler,
 };
 
 function getTools() {

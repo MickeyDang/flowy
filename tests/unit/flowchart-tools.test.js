@@ -33,7 +33,7 @@ describe('flowchart-tools', () => {
       const tools = getTools();
       
       expect(Array.isArray(tools)).toBe(true);
-      expect(tools.length).toBe(5);
+      expect(tools.length).toBe(11);
       
       const toolNames = tools.map(tool => tool.name);
       expect(toolNames).toContain('create_flowchart');
@@ -41,6 +41,12 @@ describe('flowchart-tools', () => {
       expect(toolNames).toContain('add_connection');
       expect(toolNames).toContain('auto_layout');
       expect(toolNames).toContain('export_pdf');
+      expect(toolNames).toContain('export_svg');
+      expect(toolNames).toContain('set_position');
+      expect(toolNames).toContain('resize_node');
+      expect(toolNames).toContain('get_bounding_box');
+      expect(toolNames).toContain('get_connector_points');
+      expect(toolNames).toContain('set_connector_path');
     });
 
     test('each tool has required properties', () => {

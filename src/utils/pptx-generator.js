@@ -92,7 +92,7 @@ class FlowchartPresentationGenerator {
             const targetNode = flowchart.getNode(connection.targetId);
             
             if (sourceNode && targetNode) {
-              this.addArrowShape(slide, sourceNode, targetNode, connection.label);
+              this.addArrowShape(slide, sourceNode, targetNode, connection.label, connection.pathPoints);
             }
           } catch (error) {
             console.error(`Error adding connection ${connection.sourceId} -> ${connection.targetId}:`, error.message);
@@ -131,36 +131,107 @@ class FlowchartPresentationGenerator {
     });
   }
   
-  addArrowShape(slide, sourceNode, targetNode, label = '') {
-    const connectionPoints = Positioning.calculateConnectionPoints(sourceNode, targetNode);
+  addArrowShape(slide, sourceNode, targetNode, label = '', pathPoints = null) {
+    if (pathPoints && pathPoints.length >= 2) {
+      // Use custom path with geometry
+      this.addCustomPathArrow(slide, pathPoints, label);
+    } else {
+      // Use default straight line logic
+      const connectionPoints = Positioning.calculateConnectionPoints(sourceNode, targetNode);
+      
+      const startX = connectionPoints.startX;
+      const startY = connectionPoints.startY + 1;
+      const endX = connectionPoints.endX;
+      const endY = connectionPoints.endY + 1;
+      
+      const deltaX = endX - startX;
+      const deltaY = endY - startY;
+      
+      slide.addShape('line', {
+        x: startX,
+        y: startY,
+        w: deltaX,
+        h: deltaY,
+        line: { 
+          color: '666666', 
+          width: 2,
+          endArrowType: 'triangle',
+        },
+      });
+      
+      if (label) {
+        const midX = startX + deltaX / 2;
+        const midY = startY + deltaY / 2;
+        
+        slide.addText(label, {
+          x: midX - 0.5,
+          y: midY - 0.15,
+          w: 1,
+          h: 0.3,
+          fontSize: 10,
+          color: '666666',
+          align: 'center',
+          fill: { color: 'FFFFFF' },
+        });
+      }
+    }
+  }
+  
+  addCustomPathArrow(slide, pathPoints, label = '') {
+    // Calculate bounding box for the path
+    const minX = Math.min(...pathPoints.map(p => p.x));
+    const maxX = Math.max(...pathPoints.map(p => p.x));
+    const minY = Math.min(...pathPoints.map(p => p.y));
+    const maxY = Math.max(...pathPoints.map(p => p.y));
     
-    const startX = connectionPoints.startX;
-    const startY = connectionPoints.startY + 1;
-    const endX = connectionPoints.endX;
-    const endY = connectionPoints.endY + 1;
+    const width = maxX - minX;
+    const height = maxY - minY;
     
-    const deltaX = endX - startX;
-    const deltaY = endY - startY;
+    // Convert path points to relative coordinates within the bounding box
+    const relativePoints = pathPoints.map(point => ({
+      x: width > 0 ? (point.x - minX) / width : 0,
+      y: height > 0 ? (point.y - minY) / height : 0
+    }));
     
-    slide.addShape('line', {
-      x: startX,
-      y: startY,
-      w: deltaX,
-      h: deltaY,
+    // Create custom geometry path
+    let pathData = '';
+    relativePoints.forEach((point, index) => {
+      if (index === 0) {
+        pathData += `M ${point.x} ${point.y} `;
+      } else {
+        pathData += `L ${point.x} ${point.y} `;
+      }
+    });
+    
+    // Add the custom path shape
+    slide.addShape('custGeom', {
+      x: minX,
+      y: minY + 1,
+      w: width || 0.1,
+      h: height || 0.1,
       line: { 
         color: '666666', 
         width: 2,
         endArrowType: 'triangle',
       },
+      fill: { type: 'solid', color: 'FFFFFF', alpha: 0 },
+      custGeom: {
+        pathLst: [{
+          w: width || 0.1,
+          h: height || 0.1,
+          pathData: pathData.trim()
+        }]
+      }
     });
     
     if (label) {
-      const midX = startX + deltaX / 2;
-      const midY = startY + deltaY / 2;
+      // Position label at the midpoint of the path
+      const midIndex = Math.floor(pathPoints.length / 2);
+      const midPoint = pathPoints[midIndex];
       
       slide.addText(label, {
-        x: midX - 0.5,
-        y: midY - 0.15,
+        x: midPoint.x - 0.5,
+        y: midPoint.y - 0.15,
         w: 1,
         h: 0.3,
         fontSize: 10,

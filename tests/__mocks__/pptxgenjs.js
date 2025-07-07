@@ -5,7 +5,21 @@ class MockSlide {
   }
 
   addShape(type, options) {
-    this.shapes.push({ type, options });
+    // Support for custom geometry shapes
+    if (type === 'custGeom') {
+      const shape = {
+        type,
+        options: {
+          ...options,
+          custGeom: options.custGeom || {
+            pathLst: options.custGeom?.pathLst || []
+          }
+        }
+      };
+      this.shapes.push(shape);
+    } else {
+      this.shapes.push({ type, options });
+    }
   }
 
   addText(text, options) {
@@ -35,6 +49,14 @@ class MockPptxGenJS {
 
   async writeFile({ fileName }) {
     // Mock file writing - just return success
+    return Promise.resolve();
+  }
+
+  async write({ outputType }) {
+    // Mock buffer writing for nodebuffer output
+    if (outputType === 'nodebuffer') {
+      return Promise.resolve(Buffer.from('mock-pptx-data'));
+    }
     return Promise.resolve();
   }
 }
