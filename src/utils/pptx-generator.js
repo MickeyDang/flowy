@@ -128,6 +128,8 @@ class FlowchartPresentationGenerator {
       color: shapeConfig.options.color,
       align: shapeConfig.options.align,
       valign: shapeConfig.options.valign,
+      shrinkText: shapeConfig.options.shrinkText,
+      isTextBox: shapeConfig.options.isTextBox,
     });
   }
   

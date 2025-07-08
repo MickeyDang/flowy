@@ -1,3 +1,4 @@
+// TODO: update the test mocks to deprecate the use of autolayout.
 const { callTool } = require('../../src/tools/flowchart-tools');
 
 describe('Overlap Detection Integration', () => {

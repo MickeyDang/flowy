@@ -1,3 +1,4 @@
+// TODO: update the test mocks to deprecate the use of autolayout
 class MockSlide {
   constructor() {
     this.shapes = [];
@@ -23,7 +24,7 @@ class MockSlide {
   }
 
   addText(text, options) {
-    this.texts.push({ text, options });
+    this.texts.push({ text, options: { ...options } });
   }
 }
 
