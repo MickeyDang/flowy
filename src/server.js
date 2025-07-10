@@ -1,3 +1,13 @@
+/**
+ * MCP Server - Direct stdio mode
+ * 
+ * This is the original MCP server that communicates directly with Claude Desktop
+ * via stdio transport. Use this for direct Claude Desktop integration.
+ * 
+ * Usage: node src/server.js
+ * Mode: stdio (direct communication with Claude Desktop)
+ */
+
 const express = require('express');
 const { Server } = require('@modelcontextprotocol/sdk/server/index.js');
 const { StdioServerTransport } = require('@modelcontextprotocol/sdk/server/stdio.js');
