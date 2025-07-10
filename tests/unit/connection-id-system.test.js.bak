@@ -202,7 +202,7 @@ describe('Connection ID System', () => {
         connectionId: 'invalid-format'
       });
       
-      expect(result.content[0].text).toMatch(/Error:.*not found/);
+      expect(result.content[0].text).toMatch(/Error: Connection not found: invalid-format/);
       expect(result.isError).toBe(true);
     });
 
@@ -214,7 +214,7 @@ describe('Connection ID System', () => {
         connectionId: fakeId
       });
       
-      expect(result.content[0].text).toMatch(/Error:.*not found/);
+      expect(result.content[0].text).toMatch(new RegExp(`Error: Connection not found: ${fakeId}`));
       expect(result.isError).toBe(true);
     });
 
@@ -496,7 +496,7 @@ describe('Connection ID System', () => {
         });
         
         expect(result.isError).toBe(true);
-        expect(result.content[0].text).toMatch(/Error:.*not found/);
+        expect(result.content[0].text).toMatch(new RegExp(`Error: Connection not found: ${malformedId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
       }
     });
   });

@@ -194,7 +194,7 @@ describe('get_connector_points', () => {
         connectionId: 'non-existent'
       });
       
-      expect(result.content[0].text).toMatch(/Error:.*not found/);
+      expect(result.content[0].text).toMatch(/Error: Connection not found: non-existent/);
       expect(result.isError).toBe(true);
     });
 
