@@ -46,10 +46,18 @@ class Flowchart {
         throw new NodeNotFoundError(validatedNodeId);
       }
       
+      // Count connections to be removed
+      const connectionsToRemove = this.connections.filter(
+        conn => conn.sourceId === validatedNodeId || conn.targetId === validatedNodeId
+      );
+      const removedConnectionsCount = connectionsToRemove.length;
+      
       this.nodes.delete(validatedNodeId);
       this.connections = this.connections.filter(
         conn => conn.sourceId !== validatedNodeId && conn.targetId !== validatedNodeId
       );
+      
+      return removedConnectionsCount;
     } catch (error) {
       throw error;
     }

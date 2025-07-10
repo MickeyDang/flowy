@@ -1,6 +1,7 @@
 // Import all handlers
 const createFlowchartHandler = require('./handlers/create-flowchart');
 const addNodeHandler = require('./handlers/add-node');
+const removeNodeHandler = require('./handlers/remove-node');
 const addConnectionHandler = require('./handlers/add-connection');
 const exportPdfHandler = require('./handlers/export-pdf');
 const exportSvgHandler = require('./handlers/export-svg');
@@ -17,6 +18,7 @@ const flowcharts = new Map();
 const tools = [
   createFlowchartHandler.toolDefinition,
   addNodeHandler.toolDefinition,
+  removeNodeHandler.toolDefinition,
   addConnectionHandler.toolDefinition,
   exportPdfHandler.toolDefinition,
   exportSvgHandler.toolDefinition,
@@ -31,6 +33,7 @@ const tools = [
 const handlers = {
   'create_flowchart': createFlowchartHandler.handler,
   'add_node': addNodeHandler.handler,
+  'remove_node': removeNodeHandler.handler,
   'add_connection': addConnectionHandler.handler,
   'export_pdf': exportPdfHandler.handler,
   'export_svg': exportSvgHandler.handler,
