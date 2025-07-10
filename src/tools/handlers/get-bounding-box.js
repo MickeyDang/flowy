@@ -59,16 +59,10 @@ async function handler(args, flowcharts) {
     let minX, maxX, minY, maxY;
     
     if (connection.pathPoints && connection.pathPoints.length > 0) {
-      const allPoints = [
-        { x: sourceNode.x + sourceNode.width / 2, y: sourceNode.y + sourceNode.height / 2 },
-        ...connection.pathPoints,
-        { x: targetNode.x + targetNode.width / 2, y: targetNode.y + targetNode.height / 2 }
-      ];
-      
-      minX = Math.min(...allPoints.map(p => p.x));
-      maxX = Math.max(...allPoints.map(p => p.x));
-      minY = Math.min(...allPoints.map(p => p.y));
-      maxY = Math.max(...allPoints.map(p => p.y));
+      minX = Math.min(...connection.pathPoints.map(p => p.x));
+      maxX = Math.max(...connection.pathPoints.map(p => p.x));
+      minY = Math.min(...connection.pathPoints.map(p => p.y));
+      maxY = Math.max(...connection.pathPoints.map(p => p.y));
     } else {
       const sourceCenter = { 
         x: sourceNode.x + sourceNode.width / 2, 
