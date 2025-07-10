@@ -25,6 +25,7 @@
     "express": "^5.1.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
+    "node-fetch": "^3.3.2",
     "pptxgenjs": "^4.0.1",
     "uuid": "^11.1.0"
   },
