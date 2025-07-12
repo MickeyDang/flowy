@@ -95,11 +95,14 @@ describe('Flowchart', () => {
       flowchart.addConnection(nodeId1, nodeId2, 'test label');
       
       expect(flowchart.connections.length).toBe(1);
-      expect(flowchart.connections[0]).toEqual({
+      expect(flowchart.connections[0]).toMatchObject({
         sourceId: nodeId1,
         targetId: nodeId2,
         label: 'test label',
+        pathPoints: null
       });
+      expect(flowchart.connections[0]).toHaveProperty('id');
+      expect(typeof flowchart.connections[0].id).toBe('string');
     });
 
     test('adds connection without label', () => {
