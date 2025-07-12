@@ -18,7 +18,7 @@ const toolDefinition = {
       },
       elementType: {
         type: 'string',
-        enum: ['node', 'connector'],
+        enum: ['node', 'connector', 'connection'],
         description: 'Type of element to position',
       },
       x: {
@@ -43,8 +43,8 @@ async function handler(args, flowcharts) {
   const validatedY = Validator.validatePositionCoordinate(y, 'y');
   
   // Validate element type
-  if (!elementType || !['node', 'connector'].includes(elementType)) {
-    throw new ValidationError('elementType', elementType, 'must be either "node" or "connector"');
+  if (!elementType || !['node', 'connector', 'connection'].includes(elementType)) {
+    throw new ValidationError('elementType', elementType, 'must be either "node", "connector", or "connection"');
   }
   
   const flowchart = ToolHelpers.getFlowchart(flowcharts, flowchartId);
@@ -60,10 +60,10 @@ async function handler(args, flowcharts) {
     node.setPosition(validatedX, validatedY);
     
     return ToolHelpers.createSuccessResponse(
-      `Node "${validatedElementId}" positioned at (${validatedX}, ${validatedY})`
+      `Position set for node "${validatedElementId}" to (${validatedX}, ${validatedY})`
     );
     
-  } else if (elementType === 'connector') {
+  } else if (elementType === 'connector' || elementType === 'connection') {
     // Handle connector positioning
     const connection = ToolHelpers.getConnection(flowchart, validatedElementId);
     
@@ -77,7 +77,7 @@ async function handler(args, flowcharts) {
     connection.pathPoints.push({ x: validatedX, y: validatedY });
     
     return ToolHelpers.createSuccessResponse(
-      `Connector "${validatedElementId}" updated with waypoint at (${validatedX}, ${validatedY})`
+      `Position set for connection "${validatedElementId}" to (${validatedX}, ${validatedY})`
     );
   }
 }
