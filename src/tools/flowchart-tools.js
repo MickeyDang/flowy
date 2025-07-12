@@ -3,6 +3,7 @@ const createFlowchartHandler = require('./handlers/create-flowchart');
 const addNodeHandler = require('./handlers/add-node');
 const removeNodeHandler = require('./handlers/remove-node');
 const addConnectionHandler = require('./handlers/add-connection');
+const removeConnectionHandler = require('./handlers/remove-connection');
 const exportPdfHandler = require('./handlers/export-pdf');
 const exportSvgHandler = require('./handlers/export-svg');
 const setPositionHandler = require('./handlers/set-position');
@@ -10,6 +11,9 @@ const resizeNodeHandler = require('./handlers/resize-node');
 const getBoundingBoxHandler = require('./handlers/get-bounding-box');
 const getConnectorPointsHandler = require('./handlers/get-connector-points');
 const setConnectorPathHandler = require('./handlers/set-connector-path');
+const suggestConnectorPathHandler = require('./handlers/suggest-connector-path');
+const setNodeShapeHandler = require('./handlers/set-node-shape');
+const setNodeColorHandler = require('./handlers/set-node-color');
 
 // Maintain the flowcharts Map at module level for all handlers to access
 const flowcharts = new Map();
@@ -20,6 +24,7 @@ const tools = [
   addNodeHandler.toolDefinition,
   removeNodeHandler.toolDefinition,
   addConnectionHandler.toolDefinition,
+  removeConnectionHandler.toolDefinition,
   exportPdfHandler.toolDefinition,
   exportSvgHandler.toolDefinition,
   setPositionHandler.toolDefinition,
@@ -27,6 +32,9 @@ const tools = [
   getBoundingBoxHandler.toolDefinition,
   getConnectorPointsHandler.toolDefinition,
   setConnectorPathHandler.toolDefinition,
+  suggestConnectorPathHandler.toolDefinition,
+  setNodeShapeHandler.toolDefinition,
+  setNodeColorHandler.toolDefinition,
 ];
 
 // Create handler map for routing
@@ -35,6 +43,7 @@ const handlers = {
   'add_node': addNodeHandler.handler,
   'remove_node': removeNodeHandler.handler,
   'add_connection': addConnectionHandler.handler,
+  'remove_connection': removeConnectionHandler.handler,
   'export_pdf': exportPdfHandler.handler,
   'export_svg': exportSvgHandler.handler,
   'set_position': setPositionHandler.handler,
@@ -42,6 +51,9 @@ const handlers = {
   'get_bounding_box': getBoundingBoxHandler.handler,
   'get_connector_points': getConnectorPointsHandler.handler,
   'set_connector_path': setConnectorPathHandler.handler,
+  'suggest_connector_path': suggestConnectorPathHandler.handler,
+  'set_node_shape': setNodeShapeHandler.handler,
+  'set_node_color': setNodeColorHandler.handler,
 };
 
 function getTools() {

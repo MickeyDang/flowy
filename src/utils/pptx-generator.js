@@ -79,7 +79,7 @@ class FlowchartPresentationGenerator {
       
       flowchart.nodes.forEach(node => {
         try {
-          this.addRectangleShape(slide, node);
+          this.addNodeShape(slide, node);
         } catch (error) {
           console.error(`Error adding node ${node.id}:`, error.message);
         }
@@ -106,17 +106,23 @@ class FlowchartPresentationGenerator {
     }
   }
   
-  addRectangleShape(slide, node) {
+  addNodeShape(slide, node) {
     const shapeConfig = node.toPptxShape();
     
-    slide.addShape('rect', {
+    const shapeOptions = {
       x: shapeConfig.x,
       y: shapeConfig.y + 1,
       w: shapeConfig.w,
       h: shapeConfig.h,
       fill: shapeConfig.fill,
       line: shapeConfig.line,
-    });
+    };
+
+    if (shapeConfig.custGeom) {
+      shapeOptions.custGeom = shapeConfig.custGeom;
+    }
+    
+    slide.addShape(shapeConfig.shape, shapeOptions);
     
     slide.addText(shapeConfig.text, {
       x: shapeConfig.x,

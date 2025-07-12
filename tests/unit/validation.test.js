@@ -98,4 +98,47 @@ describe('Validator', () => {
       expect(() => Validator.validateAlgorithm('random')).toThrow(ValidationError);
     });
   });
+
+  describe('validateShapeType', () => {
+    test('validates correct shape types', () => {
+      expect(Validator.validateShapeType('rectangle')).toBe('rectangle');
+      expect(Validator.validateShapeType('oval')).toBe('oval');
+      expect(Validator.validateShapeType('diamond')).toBe('diamond');
+    });
+
+    test('throws ValidationError for invalid shape types', () => {
+      expect(() => Validator.validateShapeType('')).toThrow(ValidationError);
+      expect(() => Validator.validateShapeType(null)).toThrow(ValidationError);
+      expect(() => Validator.validateShapeType(123)).toThrow(ValidationError);
+      expect(() => Validator.validateShapeType('invalid')).toThrow(ValidationError);
+      expect(() => Validator.validateShapeType('circle')).toThrow(ValidationError);
+      expect(() => Validator.validateShapeType('square')).toThrow(ValidationError);
+    });
+  });
+
+  describe('validateHexColor', () => {
+    test('validates correct hex colors', () => {
+      expect(Validator.validateHexColor('#FF0000')).toBe('#FF0000');
+      expect(Validator.validateHexColor('#F00')).toBe('#F00');
+      expect(Validator.validateHexColor('#abc123')).toBe('#ABC123');
+      expect(Validator.validateHexColor('#ABC')).toBe('#ABC');
+      expect(Validator.validateHexColor('  #ff0000  ')).toBe('#FF0000');
+    });
+
+    test('converts to uppercase', () => {
+      expect(Validator.validateHexColor('#ff0000')).toBe('#FF0000');
+      expect(Validator.validateHexColor('#abc')).toBe('#ABC');
+    });
+
+    test('throws ValidationError for invalid hex colors', () => {
+      expect(() => Validator.validateHexColor('')).toThrow(ValidationError);
+      expect(() => Validator.validateHexColor(null)).toThrow(ValidationError);
+      expect(() => Validator.validateHexColor(123)).toThrow(ValidationError);
+      expect(() => Validator.validateHexColor('FF0000')).toThrow(ValidationError); // missing #
+      expect(() => Validator.validateHexColor('#GG0000')).toThrow(ValidationError); // invalid character
+      expect(() => Validator.validateHexColor('#FF00')).toThrow(ValidationError); // wrong length
+      expect(() => Validator.validateHexColor('#FF00000')).toThrow(ValidationError); // wrong length
+      expect(() => Validator.validateHexColor('#')).toThrow(ValidationError); // just #
+    });
+  });
 });

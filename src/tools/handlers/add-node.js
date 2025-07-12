@@ -23,19 +23,31 @@ const toolDefinition = {
         },
         description: 'Optional position hint for the node',
       },
+      shapeType: {
+        type: 'string',
+        enum: ['rectangle', 'oval', 'diamond'],
+        description: 'Shape type of the node (default: rectangle)',
+      },
+      primaryColor: {
+        type: 'string',
+        pattern: '^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$',
+        description: 'Primary color for the node in hex format (#RGB or #RRGGBB, default: #0277BD)',
+      },
     },
     required: ['flowchartId', 'text'],
   },
 };
 
 async function handler(args, flowcharts) {
-  const { flowchartId, text, positionHint = { x: 0, y: 0 } } = args;
+  const { flowchartId, text, positionHint = { x: 0, y: 0 }, shapeType = 'rectangle', primaryColor = '#0277BD' } = args;
   
   const validatedText = Validator.validateText(text, 'node text');
   const validatedPosition = Validator.validatePositionHint(positionHint);
+  const validatedShapeType = Validator.validateShapeType(shapeType);
+  const validatedPrimaryColor = Validator.validateHexColor(primaryColor);
   
   const flowchart = ToolHelpers.getFlowchart(flowcharts, flowchartId);
-  const nodeId = flowchart.addNode(validatedText, validatedPosition);
+  const nodeId = flowchart.addNode(validatedText, validatedPosition, validatedShapeType, validatedPrimaryColor);
   
   return ToolHelpers.createSuccessResponse(`Node added with ID: ${nodeId}`);
 }

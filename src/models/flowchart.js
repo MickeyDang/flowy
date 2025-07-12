@@ -18,16 +18,18 @@ class Flowchart {
     return this.layout;
   }
   
-  addNode(text, positionHint = { x: 0, y: 0 }) {
+  addNode(text, positionHint = { x: 0, y: 0 }, shapeType = 'rectangle', primaryColor = '#0277BD') {
     const FlowchartNode = require('./node');
     const Validator = require('../utils/validation');
     
     try {
       const validatedText = Validator.validateText(text, 'node text');
       const validatedPosition = Validator.validatePositionHint(positionHint);
+      const validatedShapeType = Validator.validateShapeType(shapeType);
+      const validatedPrimaryColor = Validator.validateHexColor(primaryColor);
       
       const nodeId = `node_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      const node = new FlowchartNode(nodeId, validatedText, validatedPosition.x, validatedPosition.y);
+      const node = new FlowchartNode(nodeId, validatedText, validatedPosition.x, validatedPosition.y, 1, 0.5, validatedShapeType, validatedPrimaryColor);
       this.nodes.set(nodeId, node);
       return nodeId;
     } catch (error) {
