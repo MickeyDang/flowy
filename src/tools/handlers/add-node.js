@@ -23,19 +23,25 @@ const toolDefinition = {
         },
         description: 'Optional position hint for the node',
       },
+      shapeType: {
+        type: 'string',
+        enum: ['rectangle', 'oval', 'diamond'],
+        description: 'Shape type of the node (default: rectangle)',
+      },
     },
     required: ['flowchartId', 'text'],
   },
 };
 
 async function handler(args, flowcharts) {
-  const { flowchartId, text, positionHint = { x: 0, y: 0 } } = args;
+  const { flowchartId, text, positionHint = { x: 0, y: 0 }, shapeType = 'rectangle' } = args;
   
   const validatedText = Validator.validateText(text, 'node text');
   const validatedPosition = Validator.validatePositionHint(positionHint);
+  const validatedShapeType = Validator.validateShapeType(shapeType);
   
   const flowchart = ToolHelpers.getFlowchart(flowcharts, flowchartId);
-  const nodeId = flowchart.addNode(validatedText, validatedPosition);
+  const nodeId = flowchart.addNode(validatedText, validatedPosition, validatedShapeType);
   
   return ToolHelpers.createSuccessResponse(`Node added with ID: ${nodeId}`);
 }

@@ -98,4 +98,21 @@ describe('Validator', () => {
       expect(() => Validator.validateAlgorithm('random')).toThrow(ValidationError);
     });
   });
+
+  describe('validateShapeType', () => {
+    test('validates correct shape types', () => {
+      expect(Validator.validateShapeType('rectangle')).toBe('rectangle');
+      expect(Validator.validateShapeType('oval')).toBe('oval');
+      expect(Validator.validateShapeType('diamond')).toBe('diamond');
+    });
+
+    test('throws ValidationError for invalid shape types', () => {
+      expect(() => Validator.validateShapeType('')).toThrow(ValidationError);
+      expect(() => Validator.validateShapeType(null)).toThrow(ValidationError);
+      expect(() => Validator.validateShapeType(123)).toThrow(ValidationError);
+      expect(() => Validator.validateShapeType('invalid')).toThrow(ValidationError);
+      expect(() => Validator.validateShapeType('circle')).toThrow(ValidationError);
+      expect(() => Validator.validateShapeType('square')).toThrow(ValidationError);
+    });
+  });
 });

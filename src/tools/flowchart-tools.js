@@ -12,6 +12,7 @@ const getBoundingBoxHandler = require('./handlers/get-bounding-box');
 const getConnectorPointsHandler = require('./handlers/get-connector-points');
 const setConnectorPathHandler = require('./handlers/set-connector-path');
 const suggestConnectorPathHandler = require('./handlers/suggest-connector-path');
+const setNodeShapeHandler = require('./handlers/set-node-shape');
 
 // Maintain the flowcharts Map at module level for all handlers to access
 const flowcharts = new Map();
@@ -31,6 +32,7 @@ const tools = [
   getConnectorPointsHandler.toolDefinition,
   setConnectorPathHandler.toolDefinition,
   suggestConnectorPathHandler.toolDefinition,
+  setNodeShapeHandler.toolDefinition,
 ];
 
 // Create handler map for routing
@@ -48,6 +50,7 @@ const handlers = {
   'get_connector_points': getConnectorPointsHandler.handler,
   'set_connector_path': setConnectorPathHandler.handler,
   'suggest_connector_path': suggestConnectorPathHandler.handler,
+  'set_node_shape': setNodeShapeHandler.handler,
 };
 
 function getTools() {

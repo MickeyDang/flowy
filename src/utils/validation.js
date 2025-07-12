@@ -130,6 +130,19 @@ class Validator {
     
     return coordinate;
   }
+  
+  static validateShapeType(shapeType, fieldName = 'shapeType') {
+    if (!shapeType || typeof shapeType !== 'string') {
+      throw new ValidationError(fieldName, shapeType, 'must be a non-empty string');
+    }
+    
+    const validShapeTypes = ['rectangle', 'oval', 'diamond'];
+    if (!validShapeTypes.includes(shapeType)) {
+      throw new ValidationError(fieldName, shapeType, `must be one of: ${validShapeTypes.join(', ')}`);
+    }
+    
+    return shapeType;
+  }
 }
 
 module.exports = Validator;
