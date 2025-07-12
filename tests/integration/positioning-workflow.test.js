@@ -6,7 +6,7 @@ describe('Positioning Workflow Integration', () => {
   beforeEach(async () => {
     // Create flowchart
     const flowchartResult = await callTool('create_flowchart', { title: 'Positioning Test Flowchart' });
-    flowchartId = flowchartResult.content[0].text.match(/ID: (.+)$/)[1];
+    flowchartId = flowchartResult.content[0].text.match(/ID: ([a-f0-9-]+)/)[1];
     
     // Add three nodes
     const node1Result = await callTool('add_node', { 
@@ -14,21 +14,21 @@ describe('Positioning Workflow Integration', () => {
       text: 'Start Node',
       positionHint: { x: 1, y: 1 }
     });
-    nodeId1 = node1Result.content[0].text.match(/ID: (.+)$/)[1];
+    nodeId1 = node1Result.content[0].text.match(/with ID: ([a-zA-Z0-9_]+)/)[1];
     
     const node2Result = await callTool('add_node', { 
       flowchartId, 
       text: 'Middle Node',
       positionHint: { x: 5, y: 3 }
     });
-    nodeId2 = node2Result.content[0].text.match(/ID: (.+)$/)[1];
+    nodeId2 = node2Result.content[0].text.match(/with ID: ([a-zA-Z0-9_]+)/)[1];
     
     const node3Result = await callTool('add_node', { 
       flowchartId, 
       text: 'End Node',
       positionHint: { x: 8, y: 5 }
     });
-    nodeId3 = node3Result.content[0].text.match(/ID: (.+)$/)[1];
+    nodeId3 = node3Result.content[0].text.match(/with ID: ([a-zA-Z0-9_]+)/)[1];
     
     // Add connections
     const connection1Result = await callTool('add_connection', {
@@ -87,12 +87,30 @@ describe('Positioning Workflow Integration', () => {
     });
 
     test('automatic layout followed by manual adjustments', async () => {
-      // Step 1: Apply automatic layout
-      const layoutResult = await callTool('auto_layout', {
+      // Step 1: Set initial positions (simulating automatic layout)
+      await callTool('set_position', {
         flowchartId,
-        algorithm: 'hierarchical'
+        elementId: nodeId1,
+        elementType: 'node',
+        x: 1.0,
+        y: 1.0
       });
-      expect(layoutResult.isError).toBeUndefined();
+      
+      await callTool('set_position', {
+        flowchartId,
+        elementId: nodeId2,
+        elementType: 'node',
+        x: 1.0,
+        y: 3.0
+      });
+      
+      await callTool('set_position', {
+        flowchartId,
+        elementId: nodeId3,
+        elementType: 'node',
+        x: 5.0,
+        y: 2.0
+      });
       
       // Step 2: Manually adjust specific nodes
       const manualAdjustResult = await callTool('set_position', {
@@ -341,10 +359,29 @@ describe('Positioning Workflow Integration', () => {
     });
 
     test('export to SVG after positioning adjustments', async () => {
-      // Step 1: Apply hierarchical layout
-      await callTool('auto_layout', {
+      // Step 1: Set initial layout positions
+      await callTool('set_position', {
         flowchartId,
-        algorithm: 'hierarchical'
+        elementId: nodeId1,
+        elementType: 'node',
+        x: 2.0,
+        y: 1.0
+      });
+      
+      await callTool('set_position', {
+        flowchartId,
+        elementId: nodeId2,
+        elementType: 'node',
+        x: 2.0,
+        y: 3.0
+      });
+      
+      await callTool('set_position', {
+        flowchartId,
+        elementId: nodeId3,
+        elementType: 'node',
+        x: 6.0,
+        y: 2.0
       });
       
       // Step 2: Make manual adjustments

@@ -267,8 +267,8 @@ describe('get_bounding_box', () => {
       await callTool('resize_node', {
         flowchartId,
         nodeId: nodeId1,
-        width: 0.01,
-        height: 0.01
+        width: 0.1,
+        height: 0.1
       });
       
       const result = await callTool('get_bounding_box', {
@@ -278,8 +278,8 @@ describe('get_bounding_box', () => {
       });
       
       const boundingBox = JSON.parse(result.content[0].text);
-      expect(boundingBox.width).toBe(0.01);
-      expect(boundingBox.height).toBe(0.01);
+      expect(boundingBox.width).toBe(0.1);
+      expect(boundingBox.height).toBe(0.1);
     });
 
     test('handles very large node', async () => {

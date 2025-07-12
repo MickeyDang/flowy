@@ -56,7 +56,7 @@ async function handler(args, flowcharts) {
   node.setSize(validatedWidth, validatedHeight);
   
   return ToolHelpers.createSuccessResponse(
-    `Node "${nodeId}" resized to ${validatedWidth}" × ${validatedHeight}"`
+    `Node "${nodeId}" resized to ${validatedWidth} × ${validatedHeight} inches`
   );
 }
 

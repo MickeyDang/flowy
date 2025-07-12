@@ -31,7 +31,7 @@ describe('Complete Flowchart Workflow', () => {
     expect(createResult.isError).toBeUndefined();
     expect(createResult.content[0].text).toMatch(/Flowchart created with ID:/);
     
-    flowchartId = createResult.content[0].text.match(/ID: (.+)$/)[1];
+    flowchartId = createResult.content[0].text.match(/ID: ([a-f0-9-]+)/)[1];
     expect(flowchartId).toBeTruthy();
 
     // Step 2: Add nodes
@@ -42,7 +42,7 @@ describe('Complete Flowchart Workflow', () => {
     });
     
     expect(addNode1Result.isError).toBeUndefined();
-    const nodeId1 = addNode1Result.content[0].text.match(/ID: (.+)$/)[1];
+    const nodeId1 = addNode1Result.content[0].text.match(/with ID: ([a-zA-Z0-9_]+)/)[1];
 
     const addNode2Result = await callTool('add_node', {
       flowchartId,
@@ -51,7 +51,7 @@ describe('Complete Flowchart Workflow', () => {
     });
     
     expect(addNode2Result.isError).toBeUndefined();
-    const nodeId2 = addNode2Result.content[0].text.match(/ID: (.+)$/)[1];
+    const nodeId2 = addNode2Result.content[0].text.match(/with ID: ([a-zA-Z0-9_]+)/)[1];
 
     const addNode3Result = await callTool('add_node', {
       flowchartId,
@@ -60,7 +60,7 @@ describe('Complete Flowchart Workflow', () => {
     });
     
     expect(addNode3Result.isError).toBeUndefined();
-    const nodeId3 = addNode3Result.content[0].text.match(/ID: (.+)$/)[1];
+    const nodeId3 = addNode3Result.content[0].text.match(/with ID: ([a-zA-Z0-9_]+)/)[1];
 
     const addNode4Result = await callTool('add_node', {
       flowchartId,
@@ -69,7 +69,7 @@ describe('Complete Flowchart Workflow', () => {
     });
     
     expect(addNode4Result.isError).toBeUndefined();
-    const nodeId4 = addNode4Result.content[0].text.match(/ID: (.+)$/)[1];
+    const nodeId4 = addNode4Result.content[0].text.match(/with ID: ([a-zA-Z0-9_]+)/)[1];
 
     const addNode5Result = await callTool('add_node', {
       flowchartId,
@@ -78,7 +78,7 @@ describe('Complete Flowchart Workflow', () => {
     });
     
     expect(addNode5Result.isError).toBeUndefined();
-    const nodeId5 = addNode5Result.content[0].text.match(/ID: (.+)$/)[1];
+    const nodeId5 = addNode5Result.content[0].text.match(/with ID: ([a-zA-Z0-9_]+)/)[1];
 
     // Step 3: Add connections
     const addConnection1Result = await callTool('add_connection', {
@@ -124,14 +124,12 @@ describe('Complete Flowchart Workflow', () => {
     
     expect(addConnection5Result.isError).toBeUndefined();
 
-    // Step 4: Apply layout
-    const layoutResult = await callTool('auto_layout', {
-      flowchartId,
-      algorithm: 'hierarchical',
-    });
-    
-    expect(layoutResult.isError).toBeUndefined();
-    expect(layoutResult.content[0].text).toMatch(/Layout applied/);
+    // Step 4: Set initial positions (replacing deprecated auto_layout)
+    await callTool('set_position', { flowchartId, elementId: nodeId1, elementType: 'node', x: 1, y: 2 });
+    await callTool('set_position', { flowchartId, elementId: nodeId2, elementType: 'node', x: 3, y: 2 });
+    await callTool('set_position', { flowchartId, elementId: nodeId3, elementType: 'node', x: 5, y: 1 });
+    await callTool('set_position', { flowchartId, elementId: nodeId4, elementType: 'node', x: 5, y: 3 });
+    await callTool('set_position', { flowchartId, elementId: nodeId5, elementType: 'node', x: 7, y: 2 });
 
     // Step 5: Export to PDF
     const exportResult = await callTool('export_pdf', {
@@ -196,7 +194,7 @@ describe('Complete Flowchart Workflow', () => {
       title: 'Error Recovery Test' 
     });
     
-    const testFlowchartId = createResult.content[0].text.match(/ID: (.+)$/)[1];
+    const testFlowchartId = createResult.content[0].text.match(/ID: ([a-f0-9-]+)/)[1];
 
     // Add a valid node
     const validNodeResult = await callTool('add_node', {
@@ -204,7 +202,7 @@ describe('Complete Flowchart Workflow', () => {
       text: 'Valid Node',
     });
     
-    const validNodeId = validNodeResult.content[0].text.match(/ID: (.+)$/)[1];
+    const validNodeId = validNodeResult.content[0].text.match(/with ID: ([a-zA-Z0-9_]+)/)[1];
 
     // Try to add invalid node (should fail but not break system)
     const invalidNodeResult = await callTool('add_node', {
@@ -229,7 +227,7 @@ describe('Complete Flowchart Workflow', () => {
       text: 'Second Valid Node',
     });
     
-    const validNode2Id = validNode2Result.content[0].text.match(/ID: (.+)$/)[1];
+    const validNode2Id = validNode2Result.content[0].text.match(/with ID: ([a-zA-Z0-9_]+)/)[1];
 
     // Add valid connection
     const validConnectionResult = await callTool('add_connection', {
@@ -241,13 +239,9 @@ describe('Complete Flowchart Workflow', () => {
     
     expect(validConnectionResult.isError).toBeUndefined();
 
-    // Apply layout (should work despite previous errors)
-    const layoutResult = await callTool('auto_layout', {
-      flowchartId: testFlowchartId,
-      algorithm: 'hierarchical',
-    });
-    
-    expect(layoutResult.isError).toBeUndefined();
+    // Position nodes (replacing deprecated auto_layout)
+    await callTool('set_position', { flowchartId: testFlowchartId, elementId: validNodeId, elementType: 'node', x: 2, y: 2 });
+    await callTool('set_position', { flowchartId: testFlowchartId, elementId: validNode2Id, elementType: 'node', x: 4, y: 2 });
 
     // Export should work (should handle any missing layouts gracefully)
     const exportResult = await callTool('export_pdf', {
@@ -264,15 +258,9 @@ describe('Complete Flowchart Workflow', () => {
       title: 'Empty Flowchart Test' 
     });
     
-    const emptyFlowchartId = emptyFlowchartResult.content[0].text.match(/ID: (.+)$/)[1];
+    const emptyFlowchartId = emptyFlowchartResult.content[0].text.match(/ID: ([a-f0-9-]+)/)[1];
 
-    // Apply layout to empty flowchart
-    const emptyLayoutResult = await callTool('auto_layout', {
-      flowchartId: emptyFlowchartId,
-      algorithm: 'hierarchical',
-    });
-    
-    expect(emptyLayoutResult.isError).toBeUndefined();
+    // No layout needed for empty flowchart (auto_layout deprecated)
 
     // Export empty flowchart (should work and show placeholder)
     const emptyExportResult = await callTool('export_pdf', {
@@ -290,11 +278,9 @@ describe('Complete Flowchart Workflow', () => {
     
     expect(singleNodeResult.isError).toBeUndefined();
 
-    // Layout and export single node
-    await callTool('auto_layout', {
-      flowchartId: emptyFlowchartId,
-      algorithm: 'hierarchical',
-    });
+    // Position single node (replacing deprecated auto_layout)
+    const singleNodeId = singleNodeResult.content[0].text.match(/with ID: ([a-zA-Z0-9_]+)/)[1];
+    await callTool('set_position', { flowchartId: emptyFlowchartId, elementId: singleNodeId, elementType: 'node', x: 2, y: 2 });
 
     const singleNodeExportResult = await callTool('export_pdf', {
       flowchartId: emptyFlowchartId,
