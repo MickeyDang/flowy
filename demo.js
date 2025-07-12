@@ -1,15 +1,41 @@
 #!/usr/bin/env node
 
 const flowchartTools = require('./src/tools/flowchart-tools');
+const { FlowyHttpClient } = require('./src/mcp-http-client');
+require('dotenv').config();
 
 async function runDemo() {
+  // Check if HTTP mode is requested
+  const args = process.argv.slice(2);
+  const useHttp = args.includes('--http') || args.includes('-h');
+  
   console.log('🚀 Starting Flowy Demo - User Login Flow');
-  console.log('=====================================\n');
+  console.log('=====================================');
+  console.log(`Mode: ${useHttp ? 'HTTP Client' : 'Direct (stdio)'}\n`);
+
+  // Initialize the appropriate client
+  let client;
+  if (useHttp) {
+    const httpUrl = process.env.FLOWY_HTTP_SERVER_URL || 'http://localhost:3000';
+    const apiKey = process.env.FLOWY_API_KEY;
+    
+    if (!apiKey) {
+      console.error('❌ Error: FLOWY_API_KEY not found in environment');
+      console.error('💡 Run: npm run keygen -- --update-env');
+      process.exit(1);
+    }
+    
+    client = new FlowyHttpClient(httpUrl, apiKey);
+    console.log(`📡 Connected to HTTP server: ${httpUrl}\n`);
+  } else {
+    client = flowchartTools;
+    console.log('🔗 Using direct tool calls (stdio mode)\n');
+  }
 
   try {
     // Step 1: Create a new flowchart
     console.log('1. Creating flowchart...');
-    const createResult = await flowchartTools.callTool('create_flowchart', {
+    const createResult = await client.callTool('create_flowchart', {
       title: 'User Login Flow'
     });
     
@@ -34,7 +60,7 @@ async function runDemo() {
     const nodeIds = [];
     
     for (const node of nodes) {
-      const nodeResult = await flowchartTools.callTool('add_node', {
+      const nodeResult = await client.callTool('add_node', {
         flowchartId,
         text: node.text,
         positionHint: node.position
@@ -62,7 +88,7 @@ async function runDemo() {
     ];
     
     for (const conn of connections) {
-      const connResult = await flowchartTools.callTool('add_connection', {
+      const connResult = await client.callTool('add_connection', {
         flowchartId,
         sourceNodeId: nodeIds[conn.from],
         targetNodeId: nodeIds[conn.to],
@@ -83,7 +109,7 @@ async function runDemo() {
 
     // Step 5: Export to PDF
     console.log('5. Exporting to PDF...');
-    const exportResult = await flowchartTools.callTool('export_pdf', {
+    const exportResult = await client.callTool('export_pdf', {
       flowchartId,
       filename: 'user-login-flow-demo'
     });
