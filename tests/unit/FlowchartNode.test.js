@@ -132,6 +132,8 @@ describe('FlowchartNode', () => {
           color: '000000',
           align: 'center',
           valign: 'middle',
+          isTextBox: true,
+          shrinkText: true,
         },
       });
     });
