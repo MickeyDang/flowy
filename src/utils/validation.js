@@ -143,6 +143,23 @@ class Validator {
     
     return shapeType;
   }
+  
+  static validateHexColor(hexColor, fieldName = 'hexColor') {
+    if (!hexColor || typeof hexColor !== 'string') {
+      throw new ValidationError(fieldName, hexColor, 'must be a non-empty string');
+    }
+    
+    const trimmedColor = hexColor.trim();
+    
+    // Check for valid hex color format (#RGB or #RRGGBB)
+    const hexRegex = /^#([A-Fa-f0-9]{3}|[A-Fa-f0-9]{6})$/;
+    
+    if (!hexRegex.test(trimmedColor)) {
+      throw new ValidationError(fieldName, hexColor, 'must be a valid hex color in format #RGB or #RRGGBB');
+    }
+    
+    return trimmedColor.toUpperCase();
+  }
 }
 
 module.exports = Validator;

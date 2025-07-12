@@ -1,5 +1,5 @@
 class FlowchartNode {
-  constructor(id, text, x = 0, y = 0, width = 1, height = 0.5, shapeType = 'rectangle') {
+  constructor(id, text, x = 0, y = 0, width = 1, height = 0.5, shapeType = 'rectangle', primaryColor = '#0277BD') {
     const Validator = require('../utils/validation');
     
     try {
@@ -10,6 +10,7 @@ class FlowchartNode {
       this.width = typeof width === 'number' && Number.isFinite(width) ? width : 1;
       this.height = typeof height === 'number' && Number.isFinite(height) ? height : 0.5;
       this.shapeType = Validator.validateShapeType(shapeType);
+      this.primaryColor = Validator.validateHexColor(primaryColor);
       this.properties = {};
       this.createdAt = new Date();
       this.calculateDimensions();
@@ -34,6 +35,16 @@ class FlowchartNode {
     
     try {
       this.shapeType = Validator.validateShapeType(shapeType);
+    } catch (error) {
+      throw error;
+    }
+  }
+  
+  setPrimaryColor(primaryColor) {
+    const Validator = require('../utils/validation');
+    
+    try {
+      this.primaryColor = Validator.validateHexColor(primaryColor);
     } catch (error) {
       throw error;
     }
@@ -67,13 +78,18 @@ class FlowchartNode {
   }
   
   toPptxShape() {
+    const ColorUtils = require('../utils/color-utils');
+    
+    const fillColor = ColorUtils.toPptxColor(ColorUtils.generateFillColor(this.primaryColor));
+    const borderColor = ColorUtils.toPptxColor(ColorUtils.generateBorderColor(this.primaryColor));
+    
     const baseShape = {
       x: this.x,
       y: this.y,
       w: this.width,
       h: this.height,
-      fill: { color: 'E1F5FE' },
-      line: { color: '0277BD', width: 1 },
+      fill: { color: fillColor },
+      line: { color: borderColor, width: 1 },
       text: this.text,
       options: {
         fontSize: 12,
@@ -119,13 +135,14 @@ class FlowchartNode {
       width: this.width,
       height: this.height,
       shapeType: this.shapeType,
+      primaryColor: this.primaryColor,
       properties: this.properties,
       createdAt: this.createdAt,
     };
   }
   
   static fromJSON(data) {
-    const node = new FlowchartNode(data.id, data.text, data.x, data.y, data.width, data.height, data.shapeType);
+    const node = new FlowchartNode(data.id, data.text, data.x, data.y, data.width, data.height, data.shapeType, data.primaryColor);
     node.properties = data.properties || {};
     
     if (data.createdAt) {

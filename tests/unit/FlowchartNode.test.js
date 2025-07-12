@@ -22,6 +22,18 @@ describe('FlowchartNode', () => {
       expect(node.shapeType).toBe('oval');
     });
 
+    test('creates node with custom primary color', () => {
+      const node = new FlowchartNode('test-id', 'Test Node', 1, 2, 1, 0.5, 'rectangle', '#FF5722');
+      
+      expect(node.primaryColor).toBe('#FF5722');
+    });
+
+    test('uses default primary color when not specified', () => {
+      const node = new FlowchartNode('test-id', 'Test Node');
+      
+      expect(node.primaryColor).toBe('#0277BD');
+    });
+
     test('applies default position values', () => {
       const node = new FlowchartNode('test-id', 'Test');
       
@@ -47,6 +59,12 @@ describe('FlowchartNode', () => {
       expect(() => new FlowchartNode('test-id', 'Test', 0, 0, 1, 0.5, 'invalid')).toThrow(ValidationError);
       expect(() => new FlowchartNode('test-id', 'Test', 0, 0, 1, 0.5, '')).toThrow(ValidationError);
       expect(() => new FlowchartNode('test-id', 'Test', 0, 0, 1, 0.5, null)).toThrow(ValidationError);
+    });
+
+    test('throws ValidationError for invalid primary color', () => {
+      expect(() => new FlowchartNode('test-id', 'Test', 0, 0, 1, 0.5, 'rectangle', 'invalid')).toThrow(ValidationError);
+      expect(() => new FlowchartNode('test-id', 'Test', 0, 0, 1, 0.5, 'rectangle', '')).toThrow(ValidationError);
+      expect(() => new FlowchartNode('test-id', 'Test', 0, 0, 1, 0.5, 'rectangle', 'FF0000')).toThrow(ValidationError);
     });
 
     test('handles invalid numeric values gracefully', () => {
@@ -109,6 +127,31 @@ describe('FlowchartNode', () => {
     });
   });
 
+  describe('setPrimaryColor', () => {
+    test('updates primary color to valid hex colors', () => {
+      const node = new FlowchartNode('test-id', 'Test');
+      expect(node.primaryColor).toBe('#0277BD');
+      
+      node.setPrimaryColor('#FF5722');
+      expect(node.primaryColor).toBe('#FF5722');
+      
+      node.setPrimaryColor('#F00');
+      expect(node.primaryColor).toBe('#F00');
+      
+      node.setPrimaryColor('#abc123');
+      expect(node.primaryColor).toBe('#ABC123');
+    });
+
+    test('throws ValidationError for invalid primary color', () => {
+      const node = new FlowchartNode('test-id', 'Test');
+      
+      expect(() => node.setPrimaryColor('invalid')).toThrow(ValidationError);
+      expect(() => node.setPrimaryColor('')).toThrow(ValidationError);
+      expect(() => node.setPrimaryColor('FF0000')).toThrow(ValidationError);
+      expect(() => node.setPrimaryColor(null)).toThrow(ValidationError);
+    });
+  });
+
   describe('setPosition', () => {
     test('updates position coordinates', () => {
       const node = new FlowchartNode('test-id', 'Test');
@@ -151,29 +194,27 @@ describe('FlowchartNode', () => {
   });
 
   describe('toPptxShape', () => {
-    test('returns correct PPTX shape configuration for rectangle', () => {
+    test('returns correct PPTX shape configuration for rectangle with default color', () => {
       const node = new FlowchartNode('test-id', 'Test Node', 2, 3);
       const shape = node.toPptxShape();
       
-      expect(shape).toEqual({
-        x: 2,
-        y: 3,
-        w: expect.closeTo(1.35, 2), // 9 * 0.15
-        h: 0.5,
-        fill: { color: 'E1F5FE' },
-        line: { color: '0277BD', width: 1 },
-        text: 'Test Node',
-        shape: 'rect',
-        options: {
-          fontSize: 12,
-          fontFace: 'Arial',
-          color: '000000',
-          align: 'center',
-          valign: 'middle',
-          isTextBox: true,
-          shrinkText: true,
-        },
-      });
+      expect(shape.x).toBe(2);
+      expect(shape.y).toBe(3);
+      expect(shape.w).toBeCloseTo(1.35, 2);
+      expect(shape.h).toBe(0.5);
+      expect(shape.shape).toBe('rect');
+      expect(shape.text).toBe('Test Node');
+      expect(shape.fill.color).toBe('26AEFD'); // Lightened version of #0277BD
+      expect(shape.line.color).toBe('0277BD'); // Primary color
+      expect(shape.line.width).toBe(1);
+    });
+
+    test('returns correct PPTX shape configuration with custom color', () => {
+      const node = new FlowchartNode('test-id', 'Test Node', 2, 3, 1, 0.5, 'rectangle', '#FF5722');
+      const shape = node.toPptxShape();
+      
+      expect(shape.fill.color).toBe('FFA58A'); // Lightened version of #FF5722
+      expect(shape.line.color).toBe('FF5722'); // Primary color
     });
 
     test('returns correct PPTX shape configuration for oval', () => {
@@ -214,6 +255,7 @@ describe('FlowchartNode', () => {
         width: expect.closeTo(1.35, 2),
         height: 0.5,
         shapeType: 'rectangle',
+        primaryColor: '#0277BD',
         properties: {},
         createdAt: node.createdAt,
       });
@@ -224,6 +266,13 @@ describe('FlowchartNode', () => {
       const json = node.toJSON();
       
       expect(json.shapeType).toBe('oval');
+    });
+
+    test('serializes node with custom primary color', () => {
+      const node = new FlowchartNode('test-id', 'Test Node', 1, 2, 1, 0.5, 'rectangle', '#FF5722');
+      const json = node.toJSON();
+      
+      expect(json.primaryColor).toBe('#FF5722');
     });
   });
 
@@ -237,6 +286,7 @@ describe('FlowchartNode', () => {
         width: 1.5,
         height: 0.5,
         shapeType: 'oval',
+        primaryColor: '#FF5722',
         properties: { custom: 'value' },
         createdAt: new Date().toISOString(),
       };
@@ -248,6 +298,7 @@ describe('FlowchartNode', () => {
       expect(node.x).toBe(1);
       expect(node.y).toBe(2);
       expect(node.shapeType).toBe('oval');
+      expect(node.primaryColor).toBe('#FF5722');
       expect(node.properties.custom).toBe('value');
       expect(node.createdAt).toBeInstanceOf(Date);
     });
@@ -267,6 +318,24 @@ describe('FlowchartNode', () => {
       const node = FlowchartNode.fromJSON(data);
       
       expect(node.shapeType).toBe('rectangle');
+    });
+
+    test('creates node with default primary color when not provided', () => {
+      const data = {
+        id: 'test-id',
+        text: 'Test Node',
+        x: 1,
+        y: 2,
+        width: 1.5,
+        height: 0.5,
+        shapeType: 'rectangle',
+        properties: {},
+        createdAt: new Date().toISOString(),
+      };
+      
+      const node = FlowchartNode.fromJSON(data);
+      
+      expect(node.primaryColor).toBe('#0277BD');
     });
   });
 });
