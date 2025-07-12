@@ -232,8 +232,8 @@ describe('resize_node', () => {
         height: 0.01
       });
       
-      expect(result.content[0].text).toMatch(/Node .+ resized to 0.01 × 0.01 inches/);
-      expect(result.isError).toBeUndefined();
+      expect(result.content[0].text).toMatch(/Validation error for width: must be between 0.1 and 20 inches/);
+      expect(result.isError).toBe(true);
     });
 
     test('handles identical width and height', async () => {
