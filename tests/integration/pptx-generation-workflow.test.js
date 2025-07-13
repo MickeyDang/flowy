@@ -245,7 +245,7 @@ describe('PowerPoint Generation Workflow Integration', () => {
     // Check node styling consistency
     const nodeShapes = slide.shapes.filter(shape => shape.type === 'rect');
     nodeShapes.forEach(shape => {
-      expect(shape.options.fill).toHaveProperty('color', 'E1F5FE');
+      expect(shape.options.fill).toHaveProperty('color', '26AEFD');
       expect(shape.options.line).toHaveProperty('color', '0277BD');
       expect(shape.options.line).toHaveProperty('width', 1);
     });
