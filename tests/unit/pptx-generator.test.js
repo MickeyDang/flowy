@@ -511,7 +511,7 @@ describe('PowerPoint Generation with Custom Paths', () => {
       
       nodeShapes.forEach(shape => {
         expect(shape.options).toHaveProperty('fill');
-        expect(shape.options.fill).toHaveProperty('color', 'E1F5FE');
+        expect(shape.options.fill).toHaveProperty('color', '26AEFD');
         expect(shape.options).toHaveProperty('line');
         expect(shape.options.line).toHaveProperty('color', '0277BD');
         expect(shape.options.line).toHaveProperty('width', 1);

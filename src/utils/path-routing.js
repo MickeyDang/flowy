@@ -22,6 +22,9 @@ class PathRouting {
       padding = 0.1
     } = options;
 
+    // Validate and normalize routing style
+    const validatedRoutingStyle = this.validateRoutingStyle(routingStyle);
+
     // Get connection points using existing logic
     const connectionPoints = Positioning.calculateConnectionPoints(sourceNode, targetNode);
     const startPoint = { x: connectionPoints.startX, y: connectionPoints.startY };
@@ -35,7 +38,7 @@ class PathRouting {
       node.id !== sourceNode.id && node.id !== targetNode.id
     );
 
-    switch (routingStyle) {
+    switch (validatedRoutingStyle) {
       case 'straight':
         const straightResult = this.generateStraightPath(startPoint, endPoint, obstacles, { avoidObstacles, padding });
         pathPoints = straightResult.pathPoints;
@@ -67,7 +70,7 @@ class PathRouting {
     return {
       pathPoints,
       reasoning,
-      routingStyle,
+      routingStyle: validatedRoutingStyle,
       startPoint,
       endPoint
     };

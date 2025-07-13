@@ -218,24 +218,55 @@ class FlowchartSVGGenerator {
       
       if (!source || !target) return;
 
-      // Calculate connection points with centering
-      const sourceX = source.x + source.width / 2 - bounds.minX + padding + centerOffsetX;
-      const sourceY = source.y + source.height - bounds.minY + padding + centerOffsetY;
-      const targetX = target.x + target.width / 2 - bounds.minX + padding + centerOffsetX;
-      const targetY = target.y - bounds.minY + padding + centerOffsetY;
+      // Check if connection has custom pathPoints
+      if (connection.pathPoints && connection.pathPoints.length >= 2) {
+        // Transform custom pathPoints using same scaling as nodes
+        const transformedPoints = connection.pathPoints.map(point => ({
+          x: point.x * 200 - bounds.minX + padding + centerOffsetX,
+          y: point.y * 200 + 60 - bounds.minY + padding + centerOffsetY // Add title height offset
+        }));
 
-      // Create path
-      svg += `  <path d="M ${sourceX} ${sourceY} L ${targetX} ${targetY}" class="connection-line" />
+        // Create SVG path using transformed coordinates
+        let pathData = `M ${transformedPoints[0].x} ${transformedPoints[0].y}`;
+        for (let i = 1; i < transformedPoints.length; i++) {
+          pathData += ` L ${transformedPoints[i].x} ${transformedPoints[i].y}`;
+        }
+        
+        svg += `  <path d="${pathData}" class="connection-line" />
 `;
 
-      // Add label if exists
-      if (connection.label) {
-        const midX = (sourceX + targetX) / 2;
-        const midY = (sourceY + targetY) / 2;
-        svg += `  <rect x="${midX - 20}" y="${midY - 8}" width="40" height="16" fill="white" stroke="none" />
+        // Add label at midpoint of custom path
+        if (connection.label) {
+          const midIndex = Math.floor(transformedPoints.length / 2);
+          const midPoint = transformedPoints[midIndex];
+          const midX = midPoint.x;
+          const midY = midPoint.y;
+          
+          svg += `  <rect x="${midX - 20}" y="${midY - 8}" width="40" height="16" fill="white" stroke="none" />
 `;
-        svg += `  <text x="${midX}" y="${midY}" class="connection-label">${this.escapeXML(connection.label)}</text>
+          svg += `  <text x="${midX}" y="${midY}" class="connection-label">${this.escapeXML(connection.label)}</text>
 `;
+        }
+      } else {
+        // Default straight line connection logic
+        const sourceX = source.x + source.width / 2 - bounds.minX + padding + centerOffsetX;
+        const sourceY = source.y + source.height - bounds.minY + padding + centerOffsetY;
+        const targetX = target.x + target.width / 2 - bounds.minX + padding + centerOffsetX;
+        const targetY = target.y - bounds.minY + padding + centerOffsetY;
+
+        // Create path
+        svg += `  <path d="M ${sourceX} ${sourceY} L ${targetX} ${targetY}" class="connection-line" />
+`;
+
+        // Add label if exists
+        if (connection.label) {
+          const midX = (sourceX + targetX) / 2;
+          const midY = (sourceY + targetY) / 2;
+          svg += `  <rect x="${midX - 20}" y="${midY - 8}" width="40" height="16" fill="white" stroke="none" />
+`;
+          svg += `  <text x="${midX}" y="${midY}" class="connection-label">${this.escapeXML(connection.label)}</text>
+`;
+        }
       }
     });
 

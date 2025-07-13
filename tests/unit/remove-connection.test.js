@@ -103,7 +103,7 @@ describe('remove_connection', () => {
       label: 'New Connection',
     });
     
-    expect(newConnectionResult.content[0].text).toMatch(/Connection added successfully/);
+    expect(newConnectionResult.content[0].text).toMatch(/Connection added with ID:/);
     expect(newConnectionResult.isError).toBeUndefined();
   });
 
